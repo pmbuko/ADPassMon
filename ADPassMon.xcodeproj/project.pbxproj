@@ -1,0 +1,289 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		39094F241338DBE4007821C2 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39094F231338DBE4007821C2 /* Cocoa.framework */; };
+		39094F261338DBE4007821C2 /* AppleScriptObjC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39094F251338DBE4007821C2 /* AppleScriptObjC.framework */; };
+		39094F301338DBE4007821C2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 39094F2E1338DBE4007821C2 /* InfoPlist.strings */; };
+		39094F331338DBE4007821C2 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 39094F321338DBE4007821C2 /* main.m */; };
+		39094F361338DBE4007821C2 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 39094F341338DBE4007821C2 /* Credits.rtf */; };
+		39094F381338DBE4007821C2 /* ADPassMonAppDelegate.applescript in Sources */ = {isa = PBXBuildFile; fileRef = 39094F371338DBE4007821C2 /* ADPassMonAppDelegate.applescript */; };
+		39094F3B1338DBE4007821C2 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39094F391338DBE4007821C2 /* MainMenu.xib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		39094F1F1338DBE4007821C2 /* ADPassMon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ADPassMon.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		39094F231338DBE4007821C2 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		39094F251338DBE4007821C2 /* AppleScriptObjC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppleScriptObjC.framework; path = System/Library/Frameworks/AppleScriptObjC.framework; sourceTree = SDKROOT; };
+		39094F281338DBE4007821C2 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		39094F291338DBE4007821C2 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		39094F2A1338DBE4007821C2 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		39094F2D1338DBE4007821C2 /* ADPassMon-Info.plist */ = {isa = PBXFileReference; path = "ADPassMon-Info.plist"; sourceTree = "<group>"; };
+		39094F2F1338DBE4007821C2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		39094F311338DBE4007821C2 /* ADPassMon-Prefix.pch */ = {isa = PBXFileReference; path = "ADPassMon-Prefix.pch"; sourceTree = "<group>"; };
+		39094F321338DBE4007821C2 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		39094F351338DBE4007821C2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		39094F371338DBE4007821C2 /* ADPassMonAppDelegate.applescript */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.applescript; path = ADPassMonAppDelegate.applescript; sourceTree = "<group>"; };
+		39094F3A1338DBE4007821C2 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		39094F1C1338DBE4007821C2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				39094F241338DBE4007821C2 /* Cocoa.framework in Frameworks */,
+				39094F261338DBE4007821C2 /* AppleScriptObjC.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		39094F141338DBE4007821C2 = {
+			isa = PBXGroup;
+			children = (
+				39094F2B1338DBE4007821C2 /* ADPassMon */,
+				39094F221338DBE4007821C2 /* Frameworks */,
+				39094F201338DBE4007821C2 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		39094F201338DBE4007821C2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				39094F1F1338DBE4007821C2 /* ADPassMon.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		39094F221338DBE4007821C2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				39094F231338DBE4007821C2 /* Cocoa.framework */,
+				39094F251338DBE4007821C2 /* AppleScriptObjC.framework */,
+				39094F271338DBE4007821C2 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		39094F271338DBE4007821C2 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				39094F281338DBE4007821C2 /* AppKit.framework */,
+				39094F291338DBE4007821C2 /* CoreData.framework */,
+				39094F2A1338DBE4007821C2 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		39094F2B1338DBE4007821C2 /* ADPassMon */ = {
+			isa = PBXGroup;
+			children = (
+				39094F371338DBE4007821C2 /* ADPassMonAppDelegate.applescript */,
+				39094F391338DBE4007821C2 /* MainMenu.xib */,
+				39094F2C1338DBE4007821C2 /* Supporting Files */,
+			);
+			path = ADPassMon;
+			sourceTree = "<group>";
+		};
+		39094F2C1338DBE4007821C2 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				39094F2D1338DBE4007821C2 /* ADPassMon-Info.plist */,
+				39094F2E1338DBE4007821C2 /* InfoPlist.strings */,
+				39094F311338DBE4007821C2 /* ADPassMon-Prefix.pch */,
+				39094F321338DBE4007821C2 /* main.m */,
+				39094F341338DBE4007821C2 /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		39094F1E1338DBE4007821C2 /* ADPassMon */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 39094F3E1338DBE4007821C2 /* Build configuration list for PBXNativeTarget "ADPassMon" */;
+			buildPhases = (
+				39094F1B1338DBE4007821C2 /* Sources */,
+				39094F1C1338DBE4007821C2 /* Frameworks */,
+				39094F1D1338DBE4007821C2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ADPassMon;
+			productName = ADPassMon;
+			productReference = 39094F1F1338DBE4007821C2 /* ADPassMon.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		39094F161338DBE4007821C2 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 39094F191338DBE4007821C2 /* Build configuration list for PBXProject "ADPassMon" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 39094F141338DBE4007821C2;
+			productRefGroup = 39094F201338DBE4007821C2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				39094F1E1338DBE4007821C2 /* ADPassMon */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		39094F1D1338DBE4007821C2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				39094F301338DBE4007821C2 /* InfoPlist.strings in Resources */,
+				39094F361338DBE4007821C2 /* Credits.rtf in Resources */,
+				39094F3B1338DBE4007821C2 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		39094F1B1338DBE4007821C2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				39094F331338DBE4007821C2 /* main.m in Sources */,
+				39094F381338DBE4007821C2 /* ADPassMonAppDelegate.applescript in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		39094F2E1338DBE4007821C2 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				39094F2F1338DBE4007821C2 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		39094F341338DBE4007821C2 /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				39094F351338DBE4007821C2 /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		39094F391338DBE4007821C2 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				39094F3A1338DBE4007821C2 /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		39094F3C1338DBE4007821C2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		39094F3D1338DBE4007821C2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		39094F3F1338DBE4007821C2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_ENABLE_OBJC_GC = required;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "ADPassMon/ADPassMon-Prefix.pch";
+				INFOPLIST_FILE = "ADPassMon/ADPassMon-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		39094F401338DBE4007821C2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_ENABLE_OBJC_GC = required;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "ADPassMon/ADPassMon-Prefix.pch";
+				INFOPLIST_FILE = "ADPassMon/ADPassMon-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		39094F191338DBE4007821C2 /* Build configuration list for PBXProject "ADPassMon" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				39094F3C1338DBE4007821C2 /* Debug */,
+				39094F3D1338DBE4007821C2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		39094F3E1338DBE4007821C2 /* Build configuration list for PBXNativeTarget "ADPassMon" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				39094F3F1338DBE4007821C2 /* Debug */,
+				39094F401338DBE4007821C2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 39094F161338DBE4007821C2 /* Project object */;
+}
