@@ -23,12 +23,12 @@
 		39094F281338DBE4007821C2 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		39094F291338DBE4007821C2 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		39094F2A1338DBE4007821C2 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		39094F2D1338DBE4007821C2 /* ADPassMon-Info.plist */ = {isa = PBXFileReference; path = "ADPassMon-Info.plist"; sourceTree = "<group>"; };
+		39094F2D1338DBE4007821C2 /* ADPassMon-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ADPassMon-Info.plist"; sourceTree = "<group>"; };
 		39094F2F1338DBE4007821C2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		39094F311338DBE4007821C2 /* ADPassMon-Prefix.pch */ = {isa = PBXFileReference; path = "ADPassMon-Prefix.pch"; sourceTree = "<group>"; };
+		39094F311338DBE4007821C2 /* ADPassMon-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ADPassMon-Prefix.pch"; sourceTree = "<group>"; };
 		39094F321338DBE4007821C2 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		39094F351338DBE4007821C2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
-		39094F371338DBE4007821C2 /* ADPassMonAppDelegate.applescript */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.applescript; path = ADPassMonAppDelegate.applescript; sourceTree = "<group>"; };
+		39094F371338DBE4007821C2 /* ADPassMonAppDelegate.applescript */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.applescript; name = ADPassMonAppDelegate.applescript; path = ADPassMon/ADPassMonAppDelegate.applescript; sourceTree = "<group>"; };
 		39094F3A1338DBE4007821C2 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -48,6 +48,7 @@
 		39094F141338DBE4007821C2 = {
 			isa = PBXGroup;
 			children = (
+				39F99903133A5F19002DAED5 /* Classes */,
 				39094F2B1338DBE4007821C2 /* ADPassMon */,
 				39094F221338DBE4007821C2 /* Frameworks */,
 				39094F201338DBE4007821C2 /* Products */,
@@ -85,7 +86,6 @@
 		39094F2B1338DBE4007821C2 /* ADPassMon */ = {
 			isa = PBXGroup;
 			children = (
-				39094F371338DBE4007821C2 /* ADPassMonAppDelegate.applescript */,
 				39094F391338DBE4007821C2 /* MainMenu.xib */,
 				39094F2C1338DBE4007821C2 /* Supporting Files */,
 			);
@@ -102,6 +102,14 @@
 				39094F341338DBE4007821C2 /* Credits.rtf */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		39F99903133A5F19002DAED5 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				39094F371338DBE4007821C2 /* ADPassMonAppDelegate.applescript */,
+			);
+			name = Classes;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -211,6 +219,7 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INSTALL_PATH = /Applications;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -226,6 +235,7 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INSTALL_PATH = /Applications;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				SDKROOT = macosx;
 			};
@@ -282,6 +292,7 @@
 				39094F401338DBE4007821C2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
