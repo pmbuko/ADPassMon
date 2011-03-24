@@ -16,7 +16,7 @@ static NSDictionary *attributes = nil;
 + (void)initialize {
 	static BOOL isInitialzed = NO;
 	if (!isInitialzed) {
-		menuBarFont = [[NSFont menuBarFontOfSize:12.0] retain];
+		menuBarFont = [[NSFont menuBarFontOfSize:14.0] retain];
 		attributes = [[NSDictionary alloc] initWithObjectsAndKeys:menuBarFont, NSFontAttributeName, [NSParagraphStyle defaultParagraphStyle], NSParagraphStyleAttributeName, nil];
 		isInitialzed = YES;
 	}

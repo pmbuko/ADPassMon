@@ -22,6 +22,7 @@ script ADPassMonAppDelegate
 
     property isIdle : false
     
+    property tooltip : ""
     property kerb : ""
     property myDNS : ""
     property mySearchBase : ""
@@ -42,8 +43,8 @@ script ADPassMonAppDelegate
         statusMenuController's updateDisplay()
 	end revertDefaults_
     
-    on errorOut_(sender)
-        set my theMessage to theError
+    on errorOut_(theError, showErr)
+        if showErr = 1 then set my theMessage to theError as text
         set isIdle to false
     end errorOut_
     
@@ -53,7 +54,7 @@ script ADPassMonAppDelegate
             log "myDNS: " & myDNS
         on error theError
             log theError
-            errorOut_(me)
+            errorOut_(theError)
         end try
     end getDNS_
     
@@ -63,7 +64,7 @@ script ADPassMonAppDelegate
             log "mySearchBase: " & mySearchBase
         on error theError
             log theError
-            errorOut_(me)
+            errorOut_(theError, 1)
         end try
     end getSearchBase_
 
@@ -72,9 +73,9 @@ script ADPassMonAppDelegate
             set my expireAge to (do shell script "/usr/bin/ldapsearch -LLL -Q -s base -H ldap://" & myDNS & " -b " & mySearchBase & " maxPwdAge | /usr/bin/awk -F- '/maxPwdAge/{print $2/10000000}'") as integer
             log "expireAge: " & expireAge
             tell defaults to setObject_forKey_(expireAge, "expireAge")
-            on error theError
+        on error theError
             log theError
-            errorOut_(me)
+            errorOut_(theError, 1)
         end try
     end getExpireAge_
         
@@ -107,7 +108,7 @@ script ADPassMonAppDelegate
             set today to (do shell script "date +%s") as integer
             set my daysUntilExp to (round (expireAge - (today - pwdSetDate)) / 3600 / 24) as integer
             log "daysUntilExp: " & daysUntilExp
-            updateMenuTitle_(daysUntilExp)
+            updateMenuTitle_("[" & daysUntilExp & "d]", "Days until password expiration")
                         
 			set my theMessage to "Your password will expire in " & daysUntilExp & " days."
             set my isIdle to true
@@ -116,6 +117,7 @@ script ADPassMonAppDelegate
 			-- for testing
         on error theError
 			log theError
+            errorOut_(theError, 1)
 		end try
 	end doProcess_
     
@@ -150,28 +152,32 @@ script ADPassMonAppDelegate
 		quit
 	end quit_
     
-    on updateMenuTitle_(sender)
-		set menu_title to ("[" & sender & "d]") as text
-        log "menu_title: " & menu_title
+    on updateMenuTitle_(title, tip)
+		set menu_title to title as text
+        set tooltip to tip as text
+        --log "menu_title: " & menu_title
+        --log "tooltip: " & tooltip
         tell defaults to setObject_forKey_(menu_title, "menu_title")
+        tell defaults to setObject_forKey_(tooltip, "tooltip")
 		statusMenuController's updateDisplay()
 	end updateMenuTitle_
     
     on awakeFromNib()
         tell current application's NSUserDefaults to set defaults to standardUserDefaults()
-        tell defaults to registerDefaults_({menu_title:"[ ◊ ]", tooltip:"Days until password expires", expireAge:0, pwdSetDate:0})
+        tell defaults to registerDefaults_({menu_title:"[ ◊ ]", tooltip:tooltip, expireAge:0, pwdSetDate:0})
         set my theMessage to "Checking for Kerberos ticket..."
         try
             set kerb to do shell script "/usr/bin/klist"
             set my theMessage to "Idle"
             set my isIdle to true
-            on error theError
+            retrieveDefaults_(me)
+            doProcess_(me)
+        on error theError
             set my theMessage to "No Kerberos ticket found!"
-            set my isIdle to true
+            updateMenuTitle_("[ ! ]", "No Kerberos ticket found!")
             log theError
+            errorOut_(theError, 1)
         end try
-        retrieveDefaults_(me)
-        doProcess_(me)
     end awakeFromNib
     	
 	on applicationWillFinishLaunching_(aNotification)
