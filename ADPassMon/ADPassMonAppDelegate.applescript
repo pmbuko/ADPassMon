@@ -19,10 +19,11 @@ script ADPassMonAppDelegate
     property theWindow : missing value
     property defaults : missing value -- for saved prefs
     property theMessage : missing value
+    property theTimer : missing value
 
     property isIdle : false
     
-    property tooltip : ""
+    property tooltip : "Waiting for data"
     property kerb : ""
     property myDNS : ""
     property mySearchBase : ""
@@ -37,6 +38,7 @@ script ADPassMonAppDelegate
     
     on revertDefaults_(sender)
         tell defaults to removeObjectForKey_("menu_title")
+        tell defaults to removeObjectForKey_("tooltip")
 		tell defaults to removeObjectForKey_("expireAge")
 		tell defaults to removeObjectForKey_("pwdSetDate")
 		retrieveDefaults_(me)
@@ -71,7 +73,7 @@ script ADPassMonAppDelegate
     on getExpireAge_(sender)
         try
             set my expireAge to (do shell script "/usr/bin/ldapsearch -LLL -Q -s base -H ldap://" & myDNS & " -b " & mySearchBase & " maxPwdAge | /usr/bin/awk -F- '/maxPwdAge/{print $2/10000000}'") as integer
-            log "expireAge: " & expireAge
+            log "Got expireAge: " & expireAge
             tell defaults to setObject_forKey_(expireAge, "expireAge")
         on error theError
             log theError
@@ -88,7 +90,6 @@ script ADPassMonAppDelegate
             tell theWindow to displayIfNeeded()
             
             if my expireAge = 0 then
-                log "Starting first if"
                 getDNS_(me)
                 getSearchBase_(me)
                 getExpireAge_(me)
@@ -97,12 +98,11 @@ script ADPassMonAppDelegate
             end if
             
             if my pwdSetDate = 0 then
-                log "Starting second if"
                 set my pwdSetDate to ((do shell script "/usr/bin/dscl localhost read /Search/Users/$USER pwdLastSet | /usr/bin/awk '/pwdLastSet:/{print $2}'") as integer) / 10000000 - 1.16444736E+10
-                log "pwdSetDate: "& pwdSetDate
+                log "Got pwdSetDate: "& pwdSetDate
                 tell defaults to setObject_forKey_(pwdSetDate, "pwdSetDate")
             else
-                log "found pwdSetDate in plist: " & pwdSetDate
+                log "Found pwdSetDate in plist: " & pwdSetDate
             end if
             
             set today to (do shell script "date +%s") as integer
@@ -136,6 +136,7 @@ script ADPassMonAppDelegate
             activate
         end tell
         revertDefaults_(me)
+        doProcess_(me)
     end changePassword_
     
     on about_(sender)
@@ -164,20 +165,25 @@ script ADPassMonAppDelegate
     
     on awakeFromNib()
         tell current application's NSUserDefaults to set defaults to standardUserDefaults()
-        tell defaults to registerDefaults_({menu_title:"[ ◊ ]", tooltip:tooltip, expireAge:0, pwdSetDate:0})
+        tell defaults to registerDefaults_({menu_title:"[ ? ]", tooltip:tooltip, expireAge:0, pwdSetDate:0})
         set my theMessage to "Checking for Kerberos ticket..."
-        try
-            set kerb to do shell script "/usr/bin/klist"
-            set my theMessage to "Idle"
-            set my isIdle to true
+        if expireAge = 0 then
+            try
+                set kerb to do shell script "/usr/bin/klist"
+                set my theMessage to "Idle"
+                set my isIdle to true
+                retrieveDefaults_(me)
+                doProcess_(me)
+            on error theError
+                set my theMessage to "No Kerberos ticket found!"
+                updateMenuTitle_("[ ! ]", "No Kerberos ticket found!")
+                log theError
+                errorOut_(theError, 1)
+            end try
+        else
             retrieveDefaults_(me)
             doProcess_(me)
-        on error theError
-            set my theMessage to "No Kerberos ticket found!"
-            updateMenuTitle_("[ ! ]", "No Kerberos ticket found!")
-            log theError
-            errorOut_(theError, 1)
-        end try
+        end if
     end awakeFromNib
     	
 	on applicationWillFinishLaunching_(aNotification)
@@ -218,17 +224,13 @@ script ADPassMonAppDelegate
 		menuItem's setEnabled_(true)
 		statusMenu's addItem_(menuItem)
 		menuItem's release()
-		
+        		
 		--instantiate the statusItemController object and set it to use the statusMenu we just created
 		set statusMenuController to (current application's class "StatusMenuController"'s alloc)'s init
 		statusMenuController's createStatusItemWithMenu_(statusMenu)
 		statusMenu's release()
     end applicationWillFinishLaunching_
-    
-    --on applicationShouldTerminateAfterLastWindowClosed_(sender)
-	--	return true
-	--end applicationShouldTerminateAfterLastWindowClosed_
-	
+    	
 	on applicationShouldTerminate_(sender)
 		-- Insert code here to do any housekeeping before your application quits 
 		return current application's NSTerminateNow
