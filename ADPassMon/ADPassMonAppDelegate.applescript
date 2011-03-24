@@ -167,7 +167,7 @@ script ADPassMonAppDelegate
         tell current application's NSUserDefaults to set defaults to standardUserDefaults()
         tell defaults to registerDefaults_({menu_title:"[ ? ]", tooltip:tooltip, expireAge:0, pwdSetDate:0})
         set my theMessage to "Checking for Kerberos ticket..."
-        if expireAge = 0 then
+        if pwdSetDate = 0 then
             try
                 set kerb to do shell script "/usr/bin/klist"
                 set my theMessage to "Idle"
