@@ -7,12 +7,20 @@
 --
 
 script ADPassMonAppDelegate
+    -- Classes
 	property parent : class "NSObject"
+    property NSMenu : class "NSMenu"
+	property NSMenuItem : class "NSMenuItem"
+
+    -- Objects
+    property standardUserDefaults : missing value
+    property statusMenu : missing value
+    property statusMenuController : missing value
     property theWindow : missing value
     property defaults : missing value -- for saved prefs
     property theMessage : missing value
 
-    property isIdle : true
+    property isIdle : false
     
     property kerb : ""
     property myDNS : ""
@@ -27,14 +35,52 @@ script ADPassMonAppDelegate
 	end retrieveDefaults_
     
     on revertDefaults_(sender)
+        tell defaults to removeObjectForKey_("menu_title")
 		tell defaults to removeObjectForKey_("expireAge")
 		tell defaults to removeObjectForKey_("pwdSetDate")
 		retrieveDefaults_(me)
+        statusMenuController's updateDisplay()
 	end revertDefaults_
+    
+    on errorOut_(sender)
+        set my theMessage to theError
+        set isIdle to false
+    end errorOut_
+    
+    on getDNS_(sender)
+        try
+            set my myDNS to (do shell script "/usr/sbin/scutil --dns | /usr/bin/awk '/nameserver\\[1\\]/{print $3}'") as text
+            log "myDNS: " & myDNS
+        on error theError
+            log theError
+            errorOut_(me)
+        end try
+    end getDNS_
+    
+    on getSearchBase_(sender)
+        try
+            set my mySearchBase to (do shell script "/usr/bin/ldapsearch -LLL -Q -s base -H ldap://" & myDNS & " rootDomainNamingContext | /usr/bin/awk '/rootDomainNamingContext/{print $2}'") as text
+            log "mySearchBase: " & mySearchBase
+        on error theError
+            log theError
+            errorOut_(me)
+        end try
+    end getSearchBase_
+
+    on getExpireAge_(sender)
+        try
+            set my expireAge to (do shell script "/usr/bin/ldapsearch -LLL -Q -s base -H ldap://" & myDNS & " -b " & mySearchBase & " maxPwdAge | /usr/bin/awk -F- '/maxPwdAge/{print $2/10000000}'") as integer
+            log "expireAge: " & expireAge
+            tell defaults to setObject_forKey_(expireAge, "expireAge")
+            on error theError
+            log theError
+            errorOut_(me)
+        end try
+    end getExpireAge_
         
     on doProcess_(sender)
-		try -- for testing
-			log "Begin" -- for testing
+		try
+			log "Begin"
 			set my isIdle to false -- app is no longer idle
             set my theMessage to "Working…"
             
@@ -42,17 +88,11 @@ script ADPassMonAppDelegate
             
             if my expireAge = 0 then
                 log "Starting first if"
-                set my myDNS to (do shell script "/usr/sbin/scutil --dns | /usr/bin/awk '/nameserver\\[1\\]/{print $3}'") as text
-                log "myDNS: " & myDNS
-                
-                set my mySearchBase to (do shell script "/usr/bin/ldapsearch -LLL -Q -s base -H ldap://" & myDNS & " rootDomainNamingContext | /usr/bin/awk '/rootDomainNamingContext/{print $2}'") as text
-                log "mySearchBase: " & mySearchBase
-                
-                set my expireAge to (do shell script "/usr/bin/ldapsearch -LLL -Q -s base -H ldap://" & myDNS & " -b " & mySearchBase & " maxPwdAge | /usr/bin/awk -F- '/maxPwdAge/{print $2/10000000}'") as integer
-                log "expireAge: " & expireAge
-                tell defaults to setObject_forKey_(expireAge, "expireAge")
+                getDNS_(me)
+                getSearchBase_(me)
+                getExpireAge_(me)
             else
-                log "skipped first if"
+                log "Found expireAge in plist: " & expireAge
             end if
             
             if my pwdSetDate = 0 then
@@ -61,12 +101,13 @@ script ADPassMonAppDelegate
                 log "pwdSetDate: "& pwdSetDate
                 tell defaults to setObject_forKey_(pwdSetDate, "pwdSetDate")
             else
-                log "skipped second if"
+                log "found pwdSetDate in plist: " & pwdSetDate
             end if
             
             set today to (do shell script "date +%s") as integer
-            set my daysUntilExp to round (expireAge - (today - pwdSetDate)) / 3600 / 24
+            set my daysUntilExp to (round (expireAge - (today - pwdSetDate)) / 3600 / 24) as integer
             log "daysUntilExp: " & daysUntilExp
+            updateMenuTitle_(daysUntilExp)
                         
 			set my theMessage to "Your password will expire in " & daysUntilExp & " days."
             set my isIdle to true
@@ -79,41 +120,108 @@ script ADPassMonAppDelegate
 	end doProcess_
     
     on changePassword_(sender)
-        try
-            tell application "System Preferences"
-                try -- to use UI scripting
-                    set current pane to pane "Accounts"
-                    tell application "System Events"
-                        tell application process "System Preferences"
-                            click button "Change Password…" of tab group 1 of window "Accounts"
-                        end tell
+        tell application "System Preferences"
+            try -- to use UI scripting
+                set current pane to pane "Accounts"
+                tell application "System Events"
+                    tell application process "System Preferences"
+                        click button "Change Password…" of tab group 1 of window "Accounts"
                     end tell
-                on error theError
-                    log theError
-                end try
-                activate
-            end tell
-            revertDefaults_(me)
-        end try
+                end tell
+            on error theError
+                log theError
+            end try
+            activate
+        end tell
+        revertDefaults_(me)
     end changePassword_
-    	
-	on applicationWillFinishLaunching_(aNotification)
-		-- Insert code here to initialize your application before any files are opened
+    
+    on about_(sender)
+		activate
+		current application's NSApp's orderFrontStandardAboutPanel_(null)
+	end about_
+	
+	on showMainWindow_(sender)
+		activate
+		theWindow's makeKeyAndOrderFront_(null)
+	end showMainWindow_
+    
+    on quit_(sender)
+		quit
+	end quit_
+    
+    on updateMenuTitle_(sender)
+		set menu_title to ("[" & sender & "d]") as text
+        log "menu_title: " & menu_title
+        tell defaults to setObject_forKey_(menu_title, "menu_title")
+		statusMenuController's updateDisplay()
+	end updateMenuTitle_
+    
+    on awakeFromNib()
         tell current application's NSUserDefaults to set defaults to standardUserDefaults()
-        tell defaults to registerDefaults_({expireAge:0, pwdSetDate:0})
+        tell defaults to registerDefaults_({menu_title:"[ ◊ ]", tooltip:"Days until password expires", expireAge:0, pwdSetDate:0})
         set my theMessage to "Checking for Kerberos ticket..."
         try
             set kerb to do shell script "/usr/bin/klist"
             set my theMessage to "Idle"
-        on error theError
+            set my isIdle to true
+            on error theError
             set my theMessage to "No Kerberos ticket found!"
-            set my isIdle to false
+            set my isIdle to true
             log theError
         end try
-        set my theMessage to "Idle"
         retrieveDefaults_(me)
-        -- doProcess_(me)
-	end applicationWillFinishLaunching_
+        doProcess_(me)
+    end awakeFromNib
+    	
+	on applicationWillFinishLaunching_(aNotification)
+		--create the initial status menu
+		set statusMenu to (my NSMenu's alloc)'s initWithTitle_("statusMenu")
+		set menuItem to (my NSMenuItem's alloc)'s init
+		menuItem's setTitle_("About ADPassMon")
+		menuItem's setTarget_(me)
+		menuItem's setAction_("about:")
+		menuItem's setEnabled_(true)
+		statusMenu's addItem_(menuItem)
+		menuItem's release()
+        
+		statusMenu's addItem_(my NSMenuItem's separatorItem)
+		
+		set menuItem to (my NSMenuItem's alloc)'s init
+		menuItem's setTitle_("Change Password")
+		menuItem's setTarget_(me)
+		menuItem's setAction_("changePassword:")
+		menuItem's setEnabled_(true)
+		statusMenu's addItem_(menuItem)
+		menuItem's release()
+        
+		set menuItem to (my NSMenuItem's alloc)'s init
+		menuItem's setTitle_("Show Main Window")
+		menuItem's setTarget_(me)
+		menuItem's setAction_("showMainWindow:")
+		menuItem's setEnabled_(true)
+		statusMenu's addItem_(menuItem)
+		menuItem's release()
+        
+		statusMenu's addItem_(my NSMenuItem's separatorItem)
+		
+		set menuItem to (my NSMenuItem's alloc)'s init
+		menuItem's setTitle_("Quit ADPassMon")
+		menuItem's setTarget_(me)
+		menuItem's setAction_("quit:")
+		menuItem's setEnabled_(true)
+		statusMenu's addItem_(menuItem)
+		menuItem's release()
+		
+		--instantiate the statusItemController object and set it to use the statusMenu we just created
+		set statusMenuController to (current application's class "StatusMenuController"'s alloc)'s init
+		statusMenuController's createStatusItemWithMenu_(statusMenu)
+		statusMenu's release()
+    end applicationWillFinishLaunching_
+    
+    --on applicationShouldTerminateAfterLastWindowClosed_(sender)
+	--	return true
+	--end applicationShouldTerminateAfterLastWindowClosed_
 	
 	on applicationShouldTerminate_(sender)
 		-- Insert code here to do any housekeeping before your application quits 

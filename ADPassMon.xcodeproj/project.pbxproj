@@ -14,6 +14,7 @@
 		39094F361338DBE4007821C2 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 39094F341338DBE4007821C2 /* Credits.rtf */; };
 		39094F381338DBE4007821C2 /* ADPassMonAppDelegate.applescript in Sources */ = {isa = PBXBuildFile; fileRef = 39094F371338DBE4007821C2 /* ADPassMonAppDelegate.applescript */; };
 		39094F3B1338DBE4007821C2 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39094F391338DBE4007821C2 /* MainMenu.xib */; };
+		39952F35133BAD5800A8DD42 /* StatusMenuController.m in Sources */ = {isa = PBXBuildFile; fileRef = 39952F34133BAD5800A8DD42 /* StatusMenuController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,8 @@
 		39094F351338DBE4007821C2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
 		39094F371338DBE4007821C2 /* ADPassMonAppDelegate.applescript */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.applescript; name = ADPassMonAppDelegate.applescript; path = ADPassMon/ADPassMonAppDelegate.applescript; sourceTree = "<group>"; };
 		39094F3A1338DBE4007821C2 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		39952F33133BAD5800A8DD42 /* StatusMenuController.h */ = {isa = PBXFileReference; fileEncoding = 4; path = StatusMenuController.h; sourceTree = "<group>"; };
+		39952F34133BAD5800A8DD42 /* StatusMenuController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StatusMenuController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,6 +111,8 @@
 			isa = PBXGroup;
 			children = (
 				39094F371338DBE4007821C2 /* ADPassMonAppDelegate.applescript */,
+				39952F33133BAD5800A8DD42 /* StatusMenuController.h */,
+				39952F34133BAD5800A8DD42 /* StatusMenuController.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -174,6 +179,7 @@
 			files = (
 				39094F331338DBE4007821C2 /* main.m in Sources */,
 				39094F381338DBE4007821C2 /* ADPassMonAppDelegate.applescript in Sources */,
+				39952F35133BAD5800A8DD42 /* StatusMenuController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
