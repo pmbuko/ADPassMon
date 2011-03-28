@@ -36,6 +36,8 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>CFBundleDisplayName</key>
+	<string></string>
 	<key>NSServices</key>
 	<array/>
 	<key>UTExportedTypeDeclarations</key>

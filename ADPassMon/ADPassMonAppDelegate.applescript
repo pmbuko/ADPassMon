@@ -106,7 +106,8 @@ script ADPassMonAppDelegate
     
     on getDNS_(sender)
         try
-            set my myDNS to (do shell script "/usr/sbin/scutil --dns | /usr/bin/awk '/nameserver\\[1\\]/{print $3}'") as text
+            -- "first word of" added for 10.7 compatibility, and still works in 10.6
+            set my myDNS to first word of (do shell script "/usr/sbin/scutil --dns | /usr/bin/awk '/nameserver\\[1\\]/{print $3}'") as text
             log "myDNS: " & myDNS
         on error theError
             log theError
@@ -159,7 +160,8 @@ script ADPassMonAppDelegate
             end if
             
             if my pwdSetDate = 0 then
-                set my pwdSetDateUnix to (((do shell script "/usr/bin/dscl /Active\\ Directory/All\\ Domains/ read /Users/$USER pwdLastSet | /usr/bin/awk '/pwdLastSet:/{print $2}'") as integer) / 10000000 - 1.16444736E+10)
+                --set my pwdSetDateUnix to (((do shell script "/usr/bin/dscl /Active\\ Directory/All\\ Domains/ read /Users/$USER pwdLastSet | /usr/bin/awk '/pwdLastSet:/{print $2}'") as integer) / 10000000 - 1.16444736E+10)
+                set my pwdSetDateUnix to (((do shell script "/usr/bin/dscl localhost read /Search/Users/$USER pwdLastSet | /usr/bin/awk '/pwdLastSet:/{print $2}'") as integer) / 10000000 - 1.16444736E+10)
                 set my pwdSetDate to (pwdSetDateUnix / 86400)
                 log "Got pwdSetDate: "& pwdSetDate
                 tell defaults to setObject_forKey_(pwdSetDate, "pwdSetDate")
@@ -172,8 +174,8 @@ script ADPassMonAppDelegate
             set my daysUntilExp to round (expireAge - (today - pwdSetDate)) as integer
             log "daysUntilExp: " & daysUntilExp
             
-            updateMenuTitle_("[" & daysUntilExp & "d]", "Days until password expiration")
             getExpirationDate_(daysUntilExp)
+            updateMenuTitle_("[" & daysUntilExp & "d]", "AD Password expires on " & expirationDate)
             
 			set my theMessage to "Your password will expire in " & daysUntilExp & " days
 on " & expirationDate
@@ -232,9 +234,10 @@ on " & expirationDate
 -- INITIAL LOADING SECTION --    
     
     on awakeFromNib()
-        regDefaults_(me)
+        regDefaults_(me) -- populate plist file with defaults (will not overwrite non-default settings)
+        retrieveDefaults_(me)
         set my theMessage to "Checking for Kerberos ticket..."
-        if pwdSetDate = 0 then
+        if pwdSetDate = 0 then -- if we haven't yet discovered the password set date, check for kerberos ticket first
             try
                 log "Testing for kerb ticket"
                 set kerb to do shell script "/usr/bin/klist"
