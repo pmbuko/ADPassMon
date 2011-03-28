@@ -2,8 +2,8 @@
 //  main.m
 //  ADPassMon
 //
-//  Created by Peter Bukowinski on 3/22/11.
-//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  Created by Peter Bukowinski on 3/24/11.
+//  Copyright 2011 Peter Bukowinski. All rights reserved.
 //
 
 #import <Cocoa/Cocoa.h>

@@ -5,7 +5,7 @@
 //  Created by Peter Bukowinski on 3/24/11.
 //  Copyright 2011 Peter Bukowinski. All rights reserved.
 //
-// I feel it is important to give credit for portions of this code, which were
+// I feel it is important to give credit for portions of this code, attributed below.
 //
 // Created by Jonathan Nathan, JNSoftware LLC on 1/12/11.
 // Copyright 2011 JNSoftware LLC. All rights reserved.

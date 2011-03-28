@@ -14,8 +14,25 @@
 		39094F361338DBE4007821C2 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 39094F341338DBE4007821C2 /* Credits.rtf */; };
 		39094F381338DBE4007821C2 /* ADPassMonAppDelegate.applescript in Sources */ = {isa = PBXBuildFile; fileRef = 39094F371338DBE4007821C2 /* ADPassMonAppDelegate.applescript */; };
 		39094F3B1338DBE4007821C2 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39094F391338DBE4007821C2 /* MainMenu.xib */; };
+		3910E5881341116300E7EE50 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 3910E5871341116300E7EE50 /* icon.icns */; };
+		39925B9F133CE6E8001C9566 /* LaunchAtLoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = 39925B9E133CE6E8001C9566 /* LaunchAtLoginController.m */; };
+		39925BA8133D061A001C9566 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39925BA7133D061A001C9566 /* Growl.framework */; };
+		39925BAA133D0655001C9566 /* Growl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 39925BA7133D061A001C9566 /* Growl.framework */; };
 		39952F35133BAD5800A8DD42 /* StatusMenuController.m in Sources */ = {isa = PBXBuildFile; fileRef = 39952F34133BAD5800A8DD42 /* StatusMenuController.m */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		39925BA9133D064F001C9566 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				39925BAA133D0655001C9566 /* Growl.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		39094F1F1338DBE4007821C2 /* ADPassMon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ADPassMon.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -31,7 +48,11 @@
 		39094F351338DBE4007821C2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
 		39094F371338DBE4007821C2 /* ADPassMonAppDelegate.applescript */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.applescript; name = ADPassMonAppDelegate.applescript; path = ADPassMon/ADPassMonAppDelegate.applescript; sourceTree = "<group>"; };
 		39094F3A1338DBE4007821C2 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
-		39952F33133BAD5800A8DD42 /* StatusMenuController.h */ = {isa = PBXFileReference; fileEncoding = 4; path = StatusMenuController.h; sourceTree = "<group>"; };
+		3910E5871341116300E7EE50 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = icon.icns; path = ../icon.icns; sourceTree = "<group>"; };
+		39925B9D133CE6E8001C9566 /* LaunchAtLoginController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LaunchAtLoginController.h; sourceTree = "<group>"; };
+		39925B9E133CE6E8001C9566 /* LaunchAtLoginController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LaunchAtLoginController.m; sourceTree = "<group>"; };
+		39925BA7133D061A001C9566 /* Growl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Growl.framework; sourceTree = "<group>"; };
+		39952F33133BAD5800A8DD42 /* StatusMenuController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StatusMenuController.h; sourceTree = "<group>"; };
 		39952F34133BAD5800A8DD42 /* StatusMenuController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StatusMenuController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -40,6 +61,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				39925BA8133D061A001C9566 /* Growl.framework in Frameworks */,
 				39094F241338DBE4007821C2 /* Cocoa.framework in Frameworks */,
 				39094F261338DBE4007821C2 /* AppleScriptObjC.framework in Frameworks */,
 			);
@@ -69,8 +91,9 @@
 		39094F221338DBE4007821C2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				39094F231338DBE4007821C2 /* Cocoa.framework */,
+				39925BA7133D061A001C9566 /* Growl.framework */,
 				39094F251338DBE4007821C2 /* AppleScriptObjC.framework */,
+				39094F231338DBE4007821C2 /* Cocoa.framework */,
 				39094F271338DBE4007821C2 /* Other Frameworks */,
 			);
 			name = Frameworks;
@@ -98,6 +121,7 @@
 		39094F2C1338DBE4007821C2 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				3910E5871341116300E7EE50 /* icon.icns */,
 				39094F2D1338DBE4007821C2 /* ADPassMon-Info.plist */,
 				39094F2E1338DBE4007821C2 /* InfoPlist.strings */,
 				39094F311338DBE4007821C2 /* ADPassMon-Prefix.pch */,
@@ -113,6 +137,8 @@
 				39094F371338DBE4007821C2 /* ADPassMonAppDelegate.applescript */,
 				39952F33133BAD5800A8DD42 /* StatusMenuController.h */,
 				39952F34133BAD5800A8DD42 /* StatusMenuController.m */,
+				39925B9D133CE6E8001C9566 /* LaunchAtLoginController.h */,
+				39925B9E133CE6E8001C9566 /* LaunchAtLoginController.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -127,6 +153,7 @@
 				39094F1B1338DBE4007821C2 /* Sources */,
 				39094F1C1338DBE4007821C2 /* Frameworks */,
 				39094F1D1338DBE4007821C2 /* Resources */,
+				39925BA9133D064F001C9566 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -167,6 +194,7 @@
 				39094F301338DBE4007821C2 /* InfoPlist.strings in Resources */,
 				39094F361338DBE4007821C2 /* Credits.rtf in Resources */,
 				39094F3B1338DBE4007821C2 /* MainMenu.xib in Resources */,
+				3910E5881341116300E7EE50 /* icon.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -180,6 +208,7 @@
 				39094F331338DBE4007821C2 /* main.m in Sources */,
 				39094F381338DBE4007821C2 /* ADPassMonAppDelegate.applescript in Sources */,
 				39952F35133BAD5800A8DD42 /* StatusMenuController.m in Sources */,
+				39925B9F133CE6E8001C9566 /* LaunchAtLoginController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -252,6 +281,11 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/../../Desktop\"",
+				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_ENABLE_OBJC_GC = required;
@@ -269,6 +303,11 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/../../Desktop\"",
+				);
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_ENABLE_OBJC_GC = required;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
