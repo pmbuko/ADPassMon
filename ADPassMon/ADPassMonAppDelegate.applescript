@@ -18,6 +18,7 @@ script ADPassMonAppDelegate
     property NSMenu : class "NSMenu"
 	property NSMenuItem : class "NSMenuItem"
     property timerClass : class "NSTimer"
+    property pNSWorkspace : class "NSWorkspace"
 
     -- Objects
     property standardUserDefaults : missing value
@@ -103,6 +104,19 @@ script ADPassMonAppDelegate
         if showErr = 1 then set my theMessage to theError as text
         set isIdle to false
     end errorOut_
+    
+    on watchForWake_(sender)
+        tell (pNSWorkspace's sharedWorkspace())'s notificationCenter()
+            --addObserver_selector_name_object_(me, "screenDidWake", "NSWorkspaceScreensDidWakeNotification", missing value)
+            addObserver_selector_name_object_(me, "computerDidWake", "NSWorkspaceDidWakeNotification", missing value)
+            --addObserver_selector_name_object_(me, "computerWillSleep", "NSWorkspaceWillSleepNotification", missing value)
+            --addObserver_selector_name_object_(me, "screenDidSleep", "NSWorkspaceScreensDidSleepNotification", missing value)
+        end tell
+    end watchForWake_
+    
+    on computerDidWake_(sender)
+        doProcess_(me)
+    end computerDidWake_
     
     on getDNS_(sender)
         try
@@ -234,6 +248,7 @@ on " & expirationDate
 -- INITIAL LOADING SECTION --    
     
     on awakeFromNib()
+        watchForWake_(me)
         regDefaults_(me) -- populate plist file with defaults (will not overwrite non-default settings)
         retrieveDefaults_(me)
         set my theMessage to "Checking for Kerberos ticket..."
