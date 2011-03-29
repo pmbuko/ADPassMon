@@ -176,6 +176,7 @@ script ADPassMonAppDelegate
     
     -- Do most of the calculations. This is the main handler.
     on doProcess_(sender)
+        retrieveDefaults_(me)
 		try
 			log "Begin"
 			set my isIdle to false
