@@ -100,11 +100,14 @@ script ADPassMonAppDelegate
         end if
     end useManualMethod_
     
+    -- General error handler
     on errorOut_(theError, showErr)
+        log "Error: " & theError
         if showErr = 1 then set my theMessage to theError as text
         set isIdle to false
     end errorOut_
     
+    -- This handler will let us know when the computer wakes up. Extra functions we don't need are commented out.
     on watchForWake_(sender)
         tell (pNSWorkspace's sharedWorkspace())'s notificationCenter()
             --addObserver_selector_name_object_(me, "screenDidWake", "NSWorkspaceScreensDidWakeNotification", missing value)
@@ -114,31 +117,33 @@ script ADPassMonAppDelegate
         end tell
     end watchForWake_
     
+    -- Recalc expiration when the computer wakes
     on computerDidWake_(sender)
         doProcess_(me)
     end computerDidWake_
     
+    -- Use scutil to get AD DNS info
     on getDNS_(sender)
         try
             -- "first word of" added for 10.7 compatibility, and still works in 10.6
             set my myDNS to first word of (do shell script "/usr/sbin/scutil --dns | /usr/bin/awk '/nameserver\\[1\\]/{print $3}'") as text
             log "myDNS: " & myDNS
         on error theError
-            log theError
             errorOut_(theError)
         end try
     end getDNS_
     
+    -- Use ldapsearch to get search base
     on getSearchBase_(sender)
         try
             set my mySearchBase to (do shell script "/usr/bin/ldapsearch -LLL -Q -s base -H ldap://" & myDNS & " rootDomainNamingContext | /usr/bin/awk '/rootDomainNamingContext/{print $2}'") as text
             log "mySearchBase: " & mySearchBase
         on error theError
-            log theError
             errorOut_(theError, 1)
         end try
     end getSearchBase_
 
+    -- Use ldapsearch to get password expiration age
     on getExpireAge_(sender)
         try
             set my expireAgeUnix to (do shell script "/usr/bin/ldapsearch -LLL -Q -s base -H ldap://" & myDNS & " -b " & mySearchBase & " maxPwdAge | /usr/bin/awk -F- '/maxPwdAge/{print $2/10000000}'") as integer
@@ -146,25 +151,39 @@ script ADPassMonAppDelegate
             log "Got expireAge: " & expireAge
             tell defaults to setObject_forKey_(expireAge, "expireAge")
         on error theError
-            log theError
             errorOut_(theError, 1)
         end try
     end getExpireAge_
     
+    -- Calculate the number of days until password expiration
+    on compareDates_(sender)
+        try
+            set todayUnix to (do shell script "date +%s") as integer
+            set today to (todayUnix / 86400)
+            set my daysUntilExp to round (expireAge - (today - pwdSetDate)) as integer
+            log "daysUntilExp: " & daysUntilExp
+        on error theError
+            errorOut_(theError, 1)
+        end try
+    end compareDates_
+    
+    -- Get the full date of password expiration but strip off the time 
     on getExpirationDate_(remaining)
         set fullDate to (current date) + (remaining * days) as text
         set my expirationDate to text 1 thru ((offset of ":" in fullDate) - 3) of fullDate
         log "expirationDate: " & expirationDate
     end getExpirationDate_
-        
+    
+    -- Do most of the calculations. This is the main handler.
     on doProcess_(sender)
 		try
 			log "Begin"
-			set my isIdle to false -- app is no longer idle
+			set my isIdle to false
             set my theMessage to "Working…"
             
             tell theWindow to displayIfNeeded()
             
+            -- Do this if we haven't run before, or the defaults have been reset.
             if my expireAge = 0
                 getDNS_(me)
                 getSearchBase_(me)
@@ -173,6 +192,7 @@ script ADPassMonAppDelegate
                 log "Found expireAge in plist: " & expireAge
             end if
             
+            -- Do this if we haven't run before, or the defaults have been reset.
             if my pwdSetDate = 0 then
                 --set my pwdSetDateUnix to (((do shell script "/usr/bin/dscl /Active\\ Directory/All\\ Domains/ read /Users/$USER pwdLastSet | /usr/bin/awk '/pwdLastSet:/{print $2}'") as integer) / 10000000 - 1.16444736E+10)
                 set my pwdSetDateUnix to (((do shell script "/usr/bin/dscl localhost read /Search/Users/$USER pwdLastSet | /usr/bin/awk '/pwdLastSet:/{print $2}'") as integer) / 10000000 - 1.16444736E+10)
@@ -183,10 +203,7 @@ script ADPassMonAppDelegate
                 log "Found pwdSetDate in plist: " & pwdSetDate
             end if
             
-            set todayUnix to (do shell script "date +%s") as integer
-            set today to (todayUnix / 86400)
-            set my daysUntilExp to round (expireAge - (today - pwdSetDate)) as integer
-            log "daysUntilExp: " & daysUntilExp
+            compareDates_(me)
             
             getExpirationDate_(daysUntilExp)
             updateMenuTitle_("[" & daysUntilExp & "d]", "AD Password expires on " & expirationDate)
@@ -197,7 +214,6 @@ on " & expirationDate
             
 			log "End"
         on error theError
-			log theError
             errorOut_(theError, 1)
 		end try
 	end doProcess_
@@ -264,7 +280,6 @@ on " & expirationDate
                 set my theMessage to "No Kerberos ticket found!"
                 log "No kerberos ticket found"
                 updateMenuTitle_("[ ! ]", "No Kerberos ticket found!")
-                log theError
                 errorOut_(theError, 1)
             end try
         else
