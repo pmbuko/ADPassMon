@@ -109,12 +109,8 @@ script ADPassMonAppDelegate
     
     -- This handler will let us know when the computer wakes up. Extra functions we don't need are commented out.
     on watchForWake_(sender)
-        tell (pNSWorkspace's sharedWorkspace())'s notificationCenter()
-            --addObserver_selector_name_object_(me, "screenDidWake", "NSWorkspaceScreensDidWakeNotification", missing value)
-            addObserver_selector_name_object_(me, "computerDidWake", "NSWorkspaceDidWakeNotification", missing value)
-            --addObserver_selector_name_object_(me, "computerWillSleep", "NSWorkspaceWillSleepNotification", missing value)
-            --addObserver_selector_name_object_(me, "screenDidSleep", "NSWorkspaceScreensDidSleepNotification", missing value)
-        end tell
+        tell (pNSWorkspace's sharedWorkspace())'s notificationCenter() to ¬
+            addObserver_selector_name_object_(me, "computerDidWake:", "NSWorkspaceDidWakeNotification", missing value)
     end watchForWake_
     
     -- Recalc expiration when the computer wakes
