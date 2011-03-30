@@ -3,12 +3,12 @@
 	<data>
 		<int key="IBDocument.SystemTarget">1060</int>
 		<string key="IBDocument.SystemVersion">10J869</string>
-		<string key="IBDocument.InterfaceBuilderVersion">1305</string>
+		<string key="IBDocument.InterfaceBuilderVersion">1306</string>
 		<string key="IBDocument.AppKitVersion">1038.35</string>
 		<string key="IBDocument.HIToolboxVersion">461.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
-			<string key="NS.object.0">1305</string>
+			<string key="NS.object.0">1306</string>
 		</object>
 		<object class="NSArray" key="IBDocument.IntegratedClassDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -328,7 +328,7 @@
 			<object class="NSWindowTemplate" id="972006081">
 				<int key="NSWindowStyleMask">3</int>
 				<int key="NSWindowBacking">2</int>
-				<string key="NSWindowRect">{{869, 557}, {361, 281}}</string>
+				<string key="NSWindowRect">{{869, 557}, {361, 358}}</string>
 				<int key="NSWTFlags">1949303808</int>
 				<string key="NSWindowTitle">ADPassMon Preferences</string>
 				<string key="NSWindowClass">NSWindow</string>
@@ -341,7 +341,7 @@
 						<object class="NSTextField" id="358186130">
 							<reference key="NSNextResponder" ref="439893737"/>
 							<int key="NSvFlags">268</int>
-							<string key="NSFrame">{{20, 218}, {321, 43}}</string>
+							<string key="NSFrame">{{20, 295}, {321, 43}}</string>
 							<reference key="NSSuperview" ref="439893737"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="982533165"/>
@@ -381,7 +381,7 @@
 										<object class="NSTextField" id="449920734">
 											<reference key="NSNextResponder" ref="619943765"/>
 											<int key="NSvFlags">268</int>
-											<string key="NSFrame">{{15, 92}, {295, 17}}</string>
+											<string key="NSFrame">{{14, 169}, {295, 17}}</string>
 											<reference key="NSSuperview" ref="619943765"/>
 											<reference key="NSWindow"/>
 											<reference key="NSNextKeyView" ref="799948682"/>
@@ -405,7 +405,7 @@
 														<bytes key="NSWhite">MC42NjY2NjY2NjY3AA</bytes>
 													</object>
 												</object>
-												<object class="NSColor" key="NSTextColor">
+												<object class="NSColor" key="NSTextColor" id="1037715661">
 													<int key="NSColorSpace">6</int>
 													<string key="NSCatalogName">System</string>
 													<string key="NSColorName">controlTextColor</string>
@@ -419,7 +419,7 @@
 										<object class="NSMatrix" id="799948682">
 											<reference key="NSNextResponder" ref="619943765"/>
 											<int key="NSvFlags">268</int>
-											<string key="NSFrame">{{30, 64}, {222, 18}}</string>
+											<string key="NSFrame">{{29, 141}, {222, 18}}</string>
 											<reference key="NSSuperview" ref="619943765"/>
 											<reference key="NSWindow"/>
 											<reference key="NSNextKeyView" ref="432381602"/>
@@ -529,7 +529,7 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 										<object class="NSTextField" id="432381602">
 											<reference key="NSNextResponder" ref="619943765"/>
 											<int key="NSvFlags">268</int>
-											<string key="NSFrame">{{93, 60}, {50, 22}}</string>
+											<string key="NSFrame">{{92, 137}, {50, 22}}</string>
 											<reference key="NSSuperview" ref="619943765"/>
 											<reference key="NSWindow"/>
 											<reference key="NSNextKeyView" ref="292107413"/>
@@ -558,7 +558,7 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 										<object class="NSTextField" id="292107413">
 											<reference key="NSNextResponder" ref="619943765"/>
 											<int key="NSvFlags">268</int>
-											<string key="NSFrame">{{253, 62}, {50, 22}}</string>
+											<string key="NSFrame">{{252, 139}, {50, 22}}</string>
 											<reference key="NSSuperview" ref="619943765"/>
 											<reference key="NSWindow"/>
 											<reference key="NSNextKeyView" ref="61886950"/>
@@ -646,7 +646,7 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 										<object class="NSButton" id="61886950">
 											<reference key="NSNextResponder" ref="619943765"/>
 											<int key="NSvFlags">268</int>
-											<string key="NSFrame">{{16, 32}, {146, 26}}</string>
+											<string key="NSFrame">{{15, 109}, {146, 26}}</string>
 											<reference key="NSSuperview" ref="619943765"/>
 											<reference key="NSWindow"/>
 											<reference key="NSNextKeyView" ref="149517148"/>
@@ -675,13 +675,13 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 										<object class="NSButton" id="149517148">
 											<reference key="NSNextResponder" ref="619943765"/>
 											<int key="NSvFlags">268</int>
-											<string key="NSFrame">{{16, 12}, {187, 18}}</string>
+											<string key="NSFrame">{{15, 89}, {187, 18}}</string>
 											<reference key="NSSuperview" ref="619943765"/>
 											<reference key="NSWindow"/>
-											<reference key="NSNextKeyView" ref="521474325"/>
+											<reference key="NSNextKeyView" ref="575672330"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSButtonCell" key="NSCell" id="1002826131">
-												<int key="NSCellFlags">604110336</int>
+												<int key="NSCellFlags">67239424</int>
 												<int key="NSCellFlags2">0</int>
 												<string key="NSContents">Enable Growl notifications</string>
 												<reference key="NSSupport" ref="165797821"/>
@@ -696,44 +696,52 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 												<int key="NSPeriodicInterval">25</int>
 											</object>
 										</object>
-										<object class="NSTextField" id="521474325">
+										<object class="NSTextField" id="575672330">
 											<reference key="NSNextResponder" ref="619943765"/>
 											<int key="NSvFlags">268</int>
-											<string key="NSFrame">{{206, 14}, {80, 13}}</string>
+											<string key="NSFrame">{{33, 44}, {277, 39}}</string>
+											<reference key="NSSuperview" ref="619943765"/>
+											<reference key="NSWindow"/>
+											<reference key="NSNextKeyView" ref="815631923"/>
+											<bool key="NSEnabled">YES</bool>
+											<object class="NSTextFieldCell" key="NSCell" id="686762725">
+												<int key="NSCellFlags">67239424</int>
+												<int key="NSCellFlags2">272629760</int>
+												<string key="NSContents">How many days before your password expires do you want to be warned?</string>
+												<reference key="NSSupport" ref="165797821"/>
+												<reference key="NSControlView" ref="575672330"/>
+												<reference key="NSBackgroundColor" ref="700812549"/>
+												<reference key="NSTextColor" ref="1037715661"/>
+											</object>
+										</object>
+										<object class="NSTextField" id="815631923">
+											<reference key="NSNextResponder" ref="619943765"/>
+											<int key="NSvFlags">268</int>
+											<string key="NSFrame">{{36, 14}, {50, 22}}</string>
 											<reference key="NSSuperview" ref="619943765"/>
 											<reference key="NSWindow"/>
 											<reference key="NSNextKeyView" ref="729690067"/>
 											<bool key="NSEnabled">YES</bool>
-											<object class="NSTextFieldCell" key="NSCell" id="250069348">
-												<int key="NSCellFlags">68288064</int>
+											<object class="NSTextFieldCell" key="NSCell" id="865650446">
+												<int key="NSCellFlags">-1804468671</int>
 												<int key="NSCellFlags2">272630784</int>
-												<string key="NSContents">(Future feature)</string>
-												<object class="NSFont" key="NSSupport">
-													<string key="NSName">LucidaGrande</string>
-													<double key="NSSize">10</double>
-													<int key="NSfFlags">16</int>
-												</object>
-												<reference key="NSControlView" ref="521474325"/>
-												<reference key="NSBackgroundColor" ref="700812549"/>
-												<object class="NSColor" key="NSTextColor">
-													<int key="NSColorSpace">6</int>
-													<string key="NSCatalogName">System</string>
-													<string key="NSColorName">controlShadowColor</string>
-													<object class="NSColor" key="NSColor">
-														<int key="NSColorSpace">3</int>
-														<bytes key="NSWhite">MC4zMzMzMzMzMzMzAA</bytes>
-													</object>
-												</object>
+												<string key="NSContents"/>
+												<reference key="NSSupport" ref="165797821"/>
+												<reference key="NSControlView" ref="815631923"/>
+												<bool key="NSDrawsBackground">YES</bool>
+												<reference key="NSBackgroundColor" ref="1005720897"/>
+												<reference key="NSTextColor" ref="518678995"/>
 											</object>
 										</object>
 									</object>
-									<string key="NSFrame">{{1, 1}, {325, 118}}</string>
+									<string key="NSFrame">{{6, 1}, {325, 195}}</string>
 									<reference key="NSSuperview" ref="982533165"/>
 									<reference key="NSWindow"/>
 									<reference key="NSNextKeyView" ref="449920734"/>
 								</object>
 							</object>
-							<string key="NSFrame">{{17, 92}, {327, 120}}</string>
+							<string key="NSFrame">{{17, 92}, {327, 197}}</string>
+							<string key="NSBounds">{{5, 0}, {327, 197}}</string>
 							<reference key="NSSuperview" ref="439893737"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="619943765"/>
@@ -868,7 +876,7 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 							<bool key="NSTransparent">NO</bool>
 						</object>
 					</object>
-					<string key="NSFrame">{{7, 11}, {361, 281}}</string>
+					<string key="NSFrame">{{7, 11}, {361, 358}}</string>
 					<reference key="NSSuperview"/>
 					<reference key="NSWindow"/>
 					<reference key="NSNextKeyView" ref="358186130"/>
@@ -965,14 +973,6 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 					<int key="connectionID">495</int>
 				</object>
 				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">doProcess:</string>
-						<reference key="source" ref="976324537"/>
-						<reference key="destination" ref="949070500"/>
-					</object>
-					<int key="connectionID">565</int>
-				</object>
-				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
 						<string key="label">enabled: isIdle</string>
 						<reference key="source" ref="949070500"/>
@@ -1059,22 +1059,6 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 						<reference key="destination" ref="212680055"/>
 					</object>
 					<int key="connectionID">646</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBBindingConnection" key="connection">
-						<string key="label">value: growlEnabled</string>
-						<reference key="source" ref="149517148"/>
-						<reference key="destination" ref="976324537"/>
-						<object class="NSNibBindingConnector" key="connector">
-							<reference key="NSSource" ref="149517148"/>
-							<reference key="NSDestination" ref="976324537"/>
-							<string key="NSLabel">value: growlEnabled</string>
-							<string key="NSBinding">value</string>
-							<string key="NSKeyPath">growlEnabled</string>
-							<int key="NSNibBindingConnectorVersion">2</int>
-						</object>
-					</object>
-					<int key="connectionID">750</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -1257,12 +1241,64 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 					<int key="connectionID">832</int>
 				</object>
 				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">doKerbCheck:</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="949070500"/>
+					</object>
+					<int key="connectionID">835</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">toggleGrowl:</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="149517148"/>
+					</object>
+					<int key="connectionID">836</int>
+				</object>
+				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
-						<string key="label">enabled: growlEnabled</string>
+						<string key="label">value: values.growlEnabled</string>
 						<reference key="source" ref="149517148"/>
-						<reference key="destination" ref="976324537"/>
+						<reference key="destination" ref="941152501"/>
 						<object class="NSNibBindingConnector" key="connector">
 							<reference key="NSSource" ref="149517148"/>
+							<reference key="NSDestination" ref="941152501"/>
+							<string key="NSLabel">value: values.growlEnabled</string>
+							<string key="NSBinding">value</string>
+							<string key="NSKeyPath">values.growlEnabled</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValidatesImmediately</string>
+								<boolean value="YES" key="NS.object.0"/>
+							</object>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">839</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">value: warningDays</string>
+						<reference key="source" ref="815631923"/>
+						<reference key="destination" ref="976324537"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="815631923"/>
+							<reference key="NSDestination" ref="976324537"/>
+							<string key="NSLabel">value: warningDays</string>
+							<string key="NSBinding">value</string>
+							<string key="NSKeyPath">warningDays</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">850</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: growlEnabled</string>
+						<reference key="source" ref="815631923"/>
+						<reference key="destination" ref="976324537"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="815631923"/>
 							<reference key="NSDestination" ref="976324537"/>
 							<string key="NSLabel">enabled: growlEnabled</string>
 							<string key="NSBinding">enabled</string>
@@ -1270,7 +1306,15 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">834</int>
+					<int key="connectionID">852</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">setWarningDays:</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="815631923"/>
+					</object>
+					<int key="connectionID">857</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -1497,8 +1541,8 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 						<reference key="object" ref="439893737"/>
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<reference ref="982533165"/>
 							<reference ref="358186130"/>
+							<reference ref="982533165"/>
 							<reference ref="729690067"/>
 							<reference ref="1056539028"/>
 						</object>
@@ -1570,7 +1614,8 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 							<reference ref="449920734"/>
 							<reference ref="432381602"/>
 							<reference ref="799948682"/>
-							<reference ref="521474325"/>
+							<reference ref="575672330"/>
+							<reference ref="815631923"/>
 						</object>
 						<reference key="parent" ref="439893737"/>
 					</object>
@@ -1741,18 +1786,32 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 						<reference key="parent" ref="949070500"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">830</int>
-						<reference key="object" ref="521474325"/>
+						<int key="objectID">844</int>
+						<reference key="object" ref="575672330"/>
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<reference ref="250069348"/>
+							<reference ref="686762725"/>
 						</object>
 						<reference key="parent" ref="982533165"/>
 					</object>
 					<object class="IBObjectRecord">
-						<int key="objectID">831</int>
-						<reference key="object" ref="250069348"/>
-						<reference key="parent" ref="521474325"/>
+						<int key="objectID">845</int>
+						<reference key="object" ref="686762725"/>
+						<reference key="parent" ref="575672330"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">846</int>
+						<reference key="object" ref="815631923"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<reference ref="865650446"/>
+						</object>
+						<reference key="parent" ref="982533165"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">847</int>
+						<reference key="object" ref="865650446"/>
+						<reference key="parent" ref="815631923"/>
 					</object>
 				</object>
 			</object>
@@ -1872,8 +1931,10 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 					<string>82.ImportedFromIB2</string>
 					<string>83.IBPluginDependency</string>
 					<string>83.ImportedFromIB2</string>
-					<string>830.IBPluginDependency</string>
-					<string>831.IBPluginDependency</string>
+					<string>844.IBPluginDependency</string>
+					<string>845.IBPluginDependency</string>
+					<string>846.IBPluginDependency</string>
+					<string>847.IBPluginDependency</string>
 					<string>92.IBPluginDependency</string>
 					<string>92.ImportedFromIB2</string>
 				</object>
@@ -2022,6 +2083,8 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<integer value="1"/>
 				</object>
 			</object>
@@ -2037,7 +2100,7 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">834</int>
+			<int key="maxID">857</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -2052,22 +2115,40 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 							<string>about:</string>
 							<string>applicationShouldTerminate:</string>
 							<string>applicationWillFinishLaunching:</string>
+							<string>applicationWillTerminate:</string>
 							<string>changePassword:</string>
+							<string>compareDates:</string>
+							<string>computerDidWake:</string>
+							<string>doKerbCheck:</string>
 							<string>doProcess:</string>
 							<string>getDNS:</string>
 							<string>getExpirationDate:</string>
 							<string>getExpireAge:</string>
 							<string>getSearchBase:</string>
+							<string>growlNotify:</string>
+							<string>growlSetup:</string>
 							<string>quit:</string>
 							<string>regDefaults:</string>
 							<string>retrieveDefaults:</string>
 							<string>revertDefaults:</string>
+							<string>setWarningDays:</string>
 							<string>showMainWindow:</string>
 							<string>timerDidFire:</string>
+							<string>toggleGrowl:</string>
 							<string>useManualMethod:</string>
+							<string>watchForWake:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -2093,19 +2174,28 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 							<string>about:</string>
 							<string>applicationShouldTerminate:</string>
 							<string>applicationWillFinishLaunching:</string>
+							<string>applicationWillTerminate:</string>
 							<string>changePassword:</string>
+							<string>compareDates:</string>
+							<string>computerDidWake:</string>
+							<string>doKerbCheck:</string>
 							<string>doProcess:</string>
 							<string>getDNS:</string>
 							<string>getExpirationDate:</string>
 							<string>getExpireAge:</string>
 							<string>getSearchBase:</string>
+							<string>growlNotify:</string>
+							<string>growlSetup:</string>
 							<string>quit:</string>
 							<string>regDefaults:</string>
 							<string>retrieveDefaults:</string>
 							<string>revertDefaults:</string>
+							<string>setWarningDays:</string>
 							<string>showMainWindow:</string>
 							<string>timerDidFire:</string>
+							<string>toggleGrowl:</string>
 							<string>useManualMethod:</string>
+							<string>watchForWake:</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -2122,7 +2212,23 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
+								<string key="name">applicationWillTerminate:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
 								<string key="name">changePassword:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">compareDates:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">computerDidWake:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">doKerbCheck:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
@@ -2146,6 +2252,14 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
+								<string key="name">growlNotify:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">growlSetup:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
 								<string key="name">quit:</string>
 								<string key="candidateClassName">id</string>
 							</object>
@@ -2162,6 +2276,10 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
+								<string key="name">setWarningDays:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
 								<string key="name">showMainWindow:</string>
 								<string key="candidateClassName">id</string>
 							</object>
@@ -2170,7 +2288,15 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
+								<string key="name">toggleGrowl:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
 								<string key="name">useManualMethod:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">watchForWake:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 						</object>
@@ -2187,9 +2313,11 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 							<string>statusMenuController</string>
 							<string>theMessage</string>
 							<string>theWindow</string>
+							<string>warningDays</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
@@ -2212,6 +2340,7 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 							<string>statusMenuController</string>
 							<string>theMessage</string>
 							<string>theWindow</string>
+							<string>warningDays</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -2245,6 +2374,10 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">theWindow</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">warningDays</string>
 								<string key="candidateClassName">id</string>
 							</object>
 						</object>
