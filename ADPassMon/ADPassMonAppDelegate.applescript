@@ -156,7 +156,7 @@ script ADPassMonAppDelegate
         try
             set todayUnix to (do shell script "date +%s") as integer
             set today to (todayUnix / 86400)
-            set my daysUntilExp to round (expireAge - (today - pwdSetDate)) as integer
+            set my daysUntilExp to (expireAge - (today - pwdSetDate)) as integer
             log "daysUntilExp: " & daysUntilExp
         on error theError
             errorOut_(theError, 1)
@@ -172,9 +172,8 @@ script ADPassMonAppDelegate
     
     -- Do most of the calculations. This is the main handler.
     on doProcess_(sender)
-        retrieveDefaults_(me)
 		try
-			log "Begin"
+			log "Processing…"
 			set my isIdle to false
             set my theMessage to "Working…"
             
@@ -201,7 +200,6 @@ script ADPassMonAppDelegate
             end if
             
             compareDates_(me)
-            
             getExpirationDate_(daysUntilExp)
             updateMenuTitle_("[" & daysUntilExp & "d]", "AD Password expires on " & expirationDate)
             
@@ -209,7 +207,7 @@ script ADPassMonAppDelegate
 on " & expirationDate
             set my isIdle to true
             
-			log "End"
+			log "Done"
         on error theError
             errorOut_(theError, 1)
 		end try
@@ -256,7 +254,22 @@ on " & expirationDate
         tell defaults to setObject_forKey_(tooltip, "tooltip")
 		statusMenuController's updateDisplay()
 	end updateMenuTitle_
-    
+
+    on doKerbCheck_(sender)
+        try
+            log "Testing for kerb ticket"
+            set kerb to do shell script "/usr/bin/klist"
+            log "Kerb ticket found"
+            set my isIdle to true
+            retrieveDefaults_(me)
+            doProcess_(me)
+        on error theError
+            set my theMessage to "No Kerberos ticket found!"
+            log "No kerberos ticket found"
+            updateMenuTitle_("[ ! ]", "No Kerberos ticket found!")
+            errorOut_(theError, 1)
+        end try
+    end doKerbCheck_
     
 -- INITIAL LOADING SECTION --    
     
@@ -266,19 +279,7 @@ on " & expirationDate
         retrieveDefaults_(me)
         set my theMessage to "Checking for Kerberos ticket..."
         if pwdSetDate = 0 then -- if we haven't yet discovered the password set date, check for kerberos ticket first
-            try
-                log "Testing for kerb ticket"
-                set kerb to do shell script "/usr/bin/klist"
-                log "Kerb ticket found"
-                set my isIdle to true
-                retrieveDefaults_(me)
-                doProcess_(me)
-            on error theError
-                set my theMessage to "No Kerberos ticket found!"
-                log "No kerberos ticket found"
-                updateMenuTitle_("[ ! ]", "No Kerberos ticket found!")
-                errorOut_(theError, 1)
-            end try
+            doKerbCheck_(me)
         else
             retrieveDefaults_(me)
             if selectedMethod is 1 then
@@ -304,7 +305,6 @@ on " & expirationDate
     end timerDidFire_
     	
 	on applicationWillFinishLaunching_(aNotification)
-        
 		--Create the status menu items
 		set statusMenu to (my NSMenu's alloc)'s initWithTitle_("statusMenu")
 		set menuItem to (my NSMenuItem's alloc)'s init
@@ -355,11 +355,15 @@ on " & expirationDate
 		set statusMenuController to (current application's class "StatusMenuController"'s alloc)'s init
 		statusMenuController's createStatusItemWithMenu_(statusMenu)
 		statusMenu's release()
-        
     end applicationWillFinishLaunching_
         	
 	on applicationShouldTerminate_(sender)
 		return current application's NSTerminateNow
 	end applicationShouldTerminate_
+    
+    on applicationWillTerminate_(notification)
+        statusMenuController's releaseStatusItem()
+		statusMenuController's release()
+    end applicationWillTerminate_
 	
 end script
