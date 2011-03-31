@@ -42,6 +42,7 @@ script ADPassMonAppDelegate
     property warningDays : missing value
     
     property tooltip : "Waiting for data"
+    property osVersion : ""
     property kerb : ""
     property myDNS : ""
     property mySearchBase : ""
@@ -54,6 +55,9 @@ script ADPassMonAppDelegate
     property daysUntilExp : ""
     property expirationDate : ""
     
+    on getOS_(sender)
+        set my osVersion to (do shell script "system_profiler SPSoftwareDataType | awk -F. '/System Version/{print $2}'") as integer
+    end getOS_
     
     on regDefaults_(sender)
         tell current application's NSUserDefaults to set defaults to standardUserDefaults()
@@ -161,7 +165,6 @@ script ADPassMonAppDelegate
     end growlSetup_
     
     on growlNotify_(sender)
-        log "starting notify handler"
         if sender as integer < my warningDays as integer then
             if (my isGrowlRunning and my growlEnabled) is true then
                 tell application "GrowlHelperApp"
@@ -344,9 +347,21 @@ on " & expirationDate
                 activate
                 set response to (display dialog "No Kerberos ticket was found. Do you want to renew it?" with icon 1 buttons {"No","Yes"} default button "Yes")
                 if button returned of response is "Yes" then
-                    --set my kerbCheckPath to (NSBundle's mainBundle()'s bundlePath() as text) & "/Contents/Resources/kerbCheck.sh"
-                    --do shell script kerbCheckPath
-                    do shell script "/bin/echo '' | /usr/bin/kinit -l 24h &"
+                    if osVersion is greater than 6 then
+                        set iAm to (do shell script "whoami") as string
+                        set myDomain to (do shell script "dsconfigad -show | awk -F'= ' '/Active Directory Domain/{print $2}' | tr '[:lower:]' '[:upper:]'") as string
+                        set kerbID to (iAm & "@" & myDomain) as string
+                        tell application "Ticket Viewer"
+                            activate
+                            tell application "System Events"
+                                keystroke "n" using {command down}
+                                keystroke kerbID
+                                keystroke tab
+                            end tell
+                        end tell
+                    else
+                        do shell script "/bin/echo '' | /usr/bin/kinit -l 24h &"
+                    end if
                     doKerbCheck_(me)
                 else
                     errorOut_(theError, 1)
@@ -360,6 +375,7 @@ on " & expirationDate
 -- INITIAL LOADING SECTION --    
     
     on awakeFromNib()
+        getOS_(me)
         watchForWake_(me)
         regDefaults_(me) -- populate plist file with defaults (will not overwrite non-default settings)
         retrieveDefaults_(me)
