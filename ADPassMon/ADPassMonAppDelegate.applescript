@@ -14,7 +14,7 @@
 
 script ADPassMonAppDelegate
     
-    -- Classes
+--- Classes
 	property parent : class "NSObject"
     property NSMenu : class "NSMenu"
 	property NSMenuItem : class "NSMenuItem"
@@ -22,7 +22,7 @@ script ADPassMonAppDelegate
     property pNSWorkspace : class "NSWorkspace" -- for sleep notification
     property NSBundle : class "NSBundle" of current application -- for referencing files within the app bundle
 
-    -- Objects
+--- Objects
     property standardUserDefaults : missing value
     property statusMenu : missing value
     property statusMenuController : missing value
@@ -31,16 +31,18 @@ script ADPassMonAppDelegate
     property theMessage : missing value -- for stats display in pref window -- consider removing
     property manualExpireDays : missing value
     property selectedMethod : missing value
+    property warningDays : missing value
 
+--- Booleans
     property isIdle : true
     property isHidden : false
     property isManualEnabled : false
     property growlEnabled : false
     property prefsLocked : false
+    property skipKerb : false
     
+--- Other Properties
     property isGrowlRunning : ""
-    property warningDays : missing value
-    
     property tooltip : "Waiting for data"
     property osVersion : ""
     property kerb : ""
@@ -50,15 +52,30 @@ script ADPassMonAppDelegate
     property expireAgeUnix : ""
     property pwdSetDate : ""
     property pwdSetDateUnix : ""
+    property plistPwdSetDate : ""
     property today : ""
     property todayUnix : ""
     property daysUntilExp : ""
     property expirationDate : ""
+    property iAm : ""
+    property myDomain : ""
+    property kerbID : ""
+
+--- HANDLERS
     
+    -- General error handler
+    on errorOut_(theError, showErr)
+        log "Error: " & theError
+        if showErr = 1 then set my theMessage to theError as text -- consider removing
+        set isIdle to false
+    end errorOut_
+    
+    -- Need to get the OS version so we can handle Kerberos differently in 10.7
     on getOS_(sender)
         set my osVersion to (do shell script "system_profiler SPSoftwareDataType | awk -F. '/System Version/{print $2}'") as integer
     end getOS_
     
+    -- Register plist default settings
     on regDefaults_(sender)
         tell current application's NSUserDefaults to set defaults to standardUserDefaults()
         tell defaults to registerDefaults_({menu_title:"[ ? ]", ¬
@@ -71,7 +88,8 @@ script ADPassMonAppDelegate
                                             warningDays:14, ¬
                                             prefsLocked:prefsLocked})
     end regDefaults_
-    	
+    
+    -- Get values from plist
 	on retrieveDefaults_(sender)
         tell defaults to set my selectedMethod to objectForKey_("selectedMethod") as integer
 		tell defaults to set my expireAge to objectForKey_("expireAge") as integer
@@ -81,6 +99,7 @@ script ADPassMonAppDelegate
         tell defaults to set my prefsLocked to objectForKey_("prefsLocked")
 	end retrieveDefaults_
     
+    -- Revert plist values to default settings
     on revertDefaults_(sender)
         tell defaults to removeObjectForKey_("menu_title")
         tell defaults to removeObjectForKey_("tooltip")
@@ -94,9 +113,10 @@ script ADPassMonAppDelegate
         statusMenuController's updateDisplay()
 	end revertDefaults_
     
+    -- Called when Auto is clicked in Prefs or when a value is entered in Manual
     on useManualMethod_(sender)
         log "selectedMethod: " & sender's intValue()
-        if sender's intValue() is not 1 then
+        if sender's intValue() is not 1 then -- Auto sends value 1
             set my isHidden to true
             set my isManualEnabled to true
             set my selectedMethod to 1
@@ -117,11 +137,13 @@ script ADPassMonAppDelegate
         end if
     end useManualMethod_
     
+    -- Set warningDays when value is entered in prefs
     on setWarningDays_(sender)
         set my warningDays to sender's intValue() as integer
         tell defaults to setObject_forKey_(warningDays, "warningDays")
     end setWarningDays_
     
+    -- Called when Growl pref is checked/unchecked
     on toggleGrowl_(sender)
         if my growlEnabled is true then
             set my growlEnabled to false
@@ -134,6 +156,7 @@ script ADPassMonAppDelegate
         end if
     end toggleGrowl_
     
+    -- Register with Growl and set up notification(s)
     on growlSetup_(sender)
         tell application "System Events"
             set my isGrowlRunning to (count of (every process whose name is "GrowlHelperApp")) > 0
@@ -153,9 +176,7 @@ script ADPassMonAppDelegate
                 set the enabledNotificationsList to ¬
                 {"Default Notification"}
                 
-                -- Register our script with growl.
-                -- You can optionally (as here) set a default icon 
-                -- for this script's notifications.
+                -- Register with growl
                 register as application ¬
                 "ADPassMon" all notifications allNotificationsList ¬
                 default notifications enabledNotificationsList ¬
@@ -164,39 +185,75 @@ script ADPassMonAppDelegate
         end if
     end growlSetup_
     
+    -- This handler is sent daysUntilExp and will trigger an alert if ≤ warningDays
     on growlNotify_(sender)
-        if sender as integer < my warningDays as integer then
+        if sender as integer ≤ my warningDays as integer then
             if (my isGrowlRunning and my growlEnabled) is true then
                 tell application "GrowlHelperApp"
                     --	Send a Notification...
-                    notify with name ¬
-                    "Default Notification" title ¬
-                    "Password Expiration Warning" description ¬
-                    "Your password will expire in " & daysUntilExp & " days
-on " & expirationDate application name ¬
-                    "ADPassMon" icon of application "ADPassMon.app"
+                    notify with name "Default Notification" ¬
+                    title "Password Expiration Warning" ¬
+                    description "Your password will expire in " & daysUntilExp & " days on " & expirationDate ¬
+                    application name "ADPassMon" icon of application "ADPassMon.app"
                 end tell
             end if
         end if
     end growlNotify_
         
-    -- General error handler
-    on errorOut_(theError, showErr)
-        log "Error: " & theError
-        if showErr = 1 then set my theMessage to theError as text -- consider removing
-        set isIdle to false
-    end errorOut_
-    
-    -- This handler will let us know when the computer wakes up. Extra functions we don't need are commented out.
+    -- Triggers doProcess handler on wake from sleep
     on watchForWake_(sender)
         tell (pNSWorkspace's sharedWorkspace())'s notificationCenter() to ¬
-            addObserver_selector_name_object_(me, "computerDidWake:", "NSWorkspaceDidWakeNotification", missing value)
+            addObserver_selector_name_object_(me, "doProcess:", "NSWorkspaceDidWakeNotification", missing value)
     end watchForWake_
     
-    -- Recalc expiration when the computer wakes
-    on computerDidWake_(sender)
-        doProcess_(me)
-    end computerDidWake_
+    -- Checks for kerberos ticket, necessary for auto method
+    on doKerbCheck_(sender)
+        if skipKerb is false
+            if selectedMethod = 0 then
+                try
+                    log "Testing for kerb ticket"
+                    set kerb to do shell script "/usr/bin/klist -s"
+                    set renewKerb to do shell script "/usr/bin/kinit -R"
+                    log "Kerb ticket found"
+                    set my isIdle to true
+                    retrieveDefaults_(me)
+                    doProcess_(me)
+                on error theError
+                    set my theMessage to "Kerberos ticket expired or not found!"
+                    log "No kerberos ticket found"
+                    updateMenuTitle_("[ ! ]", "Kerberos ticket expired or not found!")
+                    -- offer to renew Kerberos ticket
+                    activate
+                    set response to (display dialog "No Kerberos ticket was found. Do you want to renew it?" with icon 1 buttons {"No","Yes"} default button "Yes")
+                    if button returned of response is "Yes" then
+                        getOS_(me)
+                        if my osVersion is greater than 6 then -- need to handle 10.7 specially
+                            set iAm to (do shell script "whoami") as string
+                            set myDomain to (do shell script "dsconfigad -show | awk -F'= ' '/Active Directory Domain/{print $2}' | tr '[:lower:]' '[:upper:]'") as string
+                            set kerbID to (iAm & "@" & myDomain) as string
+                            tell application "Ticket Viewer"
+                                activate
+                                tell application "System Events"
+                                    keystroke "n" using {command down}
+                                    keystroke kerbID
+                                    keystroke tab
+                                end tell
+                            end tell
+                        else -- This trick pops up a GUI kerberos password entry window in 10.6
+                            do shell script "/bin/echo '' | /usr/bin/kinit -l 24h &"
+                        end if
+                        doKerbCheck_(me)
+                    else
+                        errorOut_(theError, 1)
+                    end if
+                end try
+            else
+                doProcess_(me)
+            end if
+        else
+            doProcess_(me)
+        end if
+    end doKerbCheck_
     
     -- Use scutil to get AD DNS info
     on getDNS_(sender)
@@ -231,6 +288,27 @@ on " & expirationDate application name ¬
         end try
     end getExpireAge_
     
+    -- Determine when the password was last changed
+    on getPwdSetDate_(sender)
+        set my pwdSetDateUnix to (((do shell script "/usr/bin/dscl localhost read /Search/Users/$USER pwdLastSet | /usr/bin/awk '/pwdLastSet:/{print $2}'") as integer) / 10000000 - 1.16444736E+10)
+        set my pwdSetDate to (pwdSetDateUnix / 86400)
+        
+        -- Now we compare the plist's value for pwdSetDate to the one we just calculated so
+        -- we avoid using an old or bad value (i.e. negative when pwdLastSet can't be found)
+        tell defaults to set my plistPwdSetDate to objectForKey_("pwdSetDate") as integer
+        if plistPwdSetDate is less than pwdSetDate then
+            tell defaults to setObject_forKey_(pwdSetDate, "pwdSetDate")
+            log "  Got pwdSetDate: " & pwdSetDate
+            set my skipKerb to false
+            statusMenu's itemWithTitle_("Get/Renew Kerberos Ticket")'s setEnabled_(true)
+        else if plistPwdSetDate is greater than pwdSetDate then
+            set my pwdSetDate to plistPwdSetDate
+            log "  Using pwdSetDate from plist: " & pwdSetDate
+            set my skipKerb to true
+            statusMenu's itemWithTitle_("Get/Renew Kerberos Ticket")'s setEnabled_(false)
+        end if
+    end getPwdSetDate_
+    
     -- Calculate the number of days until password expiration
     on compareDates_(sender)
         try
@@ -250,7 +328,7 @@ on " & expirationDate application name ¬
         log "  expirationDate: " & expirationDate
     end getExpirationDate_
     
-    -- Do most of the calculations. This is the main handler.
+    -- The meat of the app; gets the data and does the calculations 
     on doProcess_(sender)
 		try
 			log "Processing…"
@@ -268,11 +346,7 @@ on " & expirationDate application name ¬
                 log "  Found expireAge in plist: " & expireAge
             end if
             
-            set my pwdSetDateUnix to (((do shell script "/usr/bin/dscl localhost read /Search/Users/$USER pwdLastSet | /usr/bin/awk '/pwdLastSet:/{print $2}'") as integer) / 10000000 - 1.16444736E+10)
-            set my pwdSetDate to (pwdSetDateUnix / 86400)
-            log "  Got pwdSetDate: "& pwdSetDate
-            tell defaults to setObject_forKey_(pwdSetDate, "pwdSetDate")
-            
+            getPwdSetDate_(me)
             compareDates_(me)
             getExpirationDate_(daysUntilExp)
             updateMenuTitle_("[" & daysUntilExp & "d]", "AD Password expires on " & expirationDate)
@@ -328,54 +402,10 @@ on " & expirationDate
         tell defaults to setObject_forKey_(tooltip, "tooltip")
 		statusMenuController's updateDisplay()
 	end updateMenuTitle_
-
-    on doKerbCheck_(sender)
-        if selectedMethod = 0 then
-            try
-                log "Testing for kerb ticket"
-                set kerb to do shell script "/usr/bin/klist -s"
-                set renewKerb to do shell script "/usr/bin/kinit -R"
-                log "Kerb ticket found"
-                set my isIdle to true
-                retrieveDefaults_(me)
-                doProcess_(me)
-            on error theError
-                set my theMessage to "Kerberos ticket expired or not found!"
-                log "No kerberos ticket found"
-                updateMenuTitle_("[ ! ]", "Kerberos ticket expired or not found!")
-                -- offer to renew Kerberos ticket
-                activate
-                set response to (display dialog "No Kerberos ticket was found. Do you want to renew it?" with icon 1 buttons {"No","Yes"} default button "Yes")
-                if button returned of response is "Yes" then
-                    if osVersion is greater than 6 then
-                        set iAm to (do shell script "whoami") as string
-                        set myDomain to (do shell script "dsconfigad -show | awk -F'= ' '/Active Directory Domain/{print $2}' | tr '[:lower:]' '[:upper:]'") as string
-                        set kerbID to (iAm & "@" & myDomain) as string
-                        tell application "Ticket Viewer"
-                            activate
-                            tell application "System Events"
-                                keystroke "n" using {command down}
-                                keystroke kerbID
-                                keystroke tab
-                            end tell
-                        end tell
-                    else
-                        do shell script "/bin/echo '' | /usr/bin/kinit -l 24h &"
-                    end if
-                    doKerbCheck_(me)
-                else
-                    errorOut_(theError, 1)
-                end if
-            end try
-        else
-            doProcess_(me)
-        end if
-    end doKerbCheck_
         
 -- INITIAL LOADING SECTION --    
     
     on awakeFromNib()
-        getOS_(me)
         watchForWake_(me)
         regDefaults_(me) -- populate plist file with defaults (will not overwrite non-default settings)
         retrieveDefaults_(me)
@@ -477,7 +507,6 @@ on " & expirationDate
 		set statusMenuController to (current application's class "StatusMenuController"'s alloc)'s init
 		statusMenuController's createStatusItemWithMenu_(statusMenu)
 		statusMenu's release()
-        
     end applicationWillFinishLaunching_
     
 	on applicationShouldTerminate_(sender)
