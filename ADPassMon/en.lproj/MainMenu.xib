@@ -328,7 +328,7 @@
 			<object class="NSWindowTemplate" id="972006081">
 				<int key="NSWindowStyleMask">3</int>
 				<int key="NSWindowBacking">2</int>
-				<string key="NSWindowRect">{{869, 557}, {361, 358}}</string>
+				<string key="NSWindowRect">{{862, 446}, {361, 340}}</string>
 				<int key="NSWTFlags">1949303808</int>
 				<string key="NSWindowTitle">ADPassMon Preferences</string>
 				<string key="NSWindowClass">NSWindow</string>
@@ -341,7 +341,7 @@
 						<object class="NSTextField" id="358186130">
 							<reference key="NSNextResponder" ref="439893737"/>
 							<int key="NSvFlags">268</int>
-							<string key="NSFrame">{{20, 295}, {321, 43}}</string>
+							<string key="NSFrame">{{20, 277}, {321, 43}}</string>
 							<reference key="NSSuperview" ref="439893737"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="982533165"/>
@@ -362,7 +362,7 @@
 									<int key="NSColorSpace">1</int>
 									<bytes key="NSRGB">MCAwLjI1MDk4MDQwNyAwLjUwMTk2MDgxNCAwLjE1AA</bytes>
 								</object>
-								<object class="NSColor" key="NSTextColor">
+								<object class="NSColor" key="NSTextColor" id="95400874">
 									<int key="NSColorSpace">1</int>
 									<bytes key="NSRGB">MCAwIDAAA</bytes>
 								</object>
@@ -381,7 +381,7 @@
 										<object class="NSTextField" id="449920734">
 											<reference key="NSNextResponder" ref="619943765"/>
 											<int key="NSvFlags">268</int>
-											<string key="NSFrame">{{14, 169}, {295, 17}}</string>
+											<string key="NSFrame">{{14, 151}, {295, 17}}</string>
 											<reference key="NSSuperview" ref="619943765"/>
 											<reference key="NSWindow"/>
 											<reference key="NSNextKeyView" ref="799948682"/>
@@ -405,7 +405,7 @@
 														<bytes key="NSWhite">MC42NjY2NjY2NjY3AA</bytes>
 													</object>
 												</object>
-												<object class="NSColor" key="NSTextColor" id="1037715661">
+												<object class="NSColor" key="NSTextColor">
 													<int key="NSColorSpace">6</int>
 													<string key="NSCatalogName">System</string>
 													<string key="NSColorName">controlTextColor</string>
@@ -419,7 +419,7 @@
 										<object class="NSMatrix" id="799948682">
 											<reference key="NSNextResponder" ref="619943765"/>
 											<int key="NSvFlags">268</int>
-											<string key="NSFrame">{{29, 141}, {222, 18}}</string>
+											<string key="NSFrame">{{29, 123}, {222, 18}}</string>
 											<reference key="NSSuperview" ref="619943765"/>
 											<reference key="NSWindow"/>
 											<reference key="NSNextKeyView" ref="432381602"/>
@@ -459,7 +459,7 @@
 												</object>
 											</object>
 											<string key="NSCellSize">{80, 18}</string>
-											<string key="NSIntercellSpacing">{65, 2}</string>
+											<string key="NSIntercellSpacing">{46, 2}</string>
 											<int key="NSMatrixFlags">1151868928</int>
 											<string key="NSCellClass">NSActionCell</string>
 											<object class="NSButtonCell" key="NSProtoCell" id="325992881">
@@ -529,7 +529,7 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 										<object class="NSTextField" id="432381602">
 											<reference key="NSNextResponder" ref="619943765"/>
 											<int key="NSvFlags">268</int>
-											<string key="NSFrame">{{92, 137}, {50, 22}}</string>
+											<string key="NSFrame">{{90, 119}, {50, 22}}</string>
 											<reference key="NSSuperview" ref="619943765"/>
 											<reference key="NSWindow"/>
 											<reference key="NSNextKeyView" ref="292107413"/>
@@ -558,7 +558,7 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 										<object class="NSTextField" id="292107413">
 											<reference key="NSNextResponder" ref="619943765"/>
 											<int key="NSvFlags">268</int>
-											<string key="NSFrame">{{252, 139}, {50, 22}}</string>
+											<string key="NSFrame">{{232, 121}, {50, 22}}</string>
 											<reference key="NSSuperview" ref="619943765"/>
 											<reference key="NSWindow"/>
 											<reference key="NSNextKeyView" ref="61886950"/>
@@ -594,9 +594,9 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 															<integer value="1040"/>
 															<integer value="3"/>
 															<boolean value="NO"/>
-															<real value="365"/>
+															<real value="999"/>
 															<integer value="3"/>
-															<real value="0.0"/>
+															<real value="2"/>
 															<real value="1"/>
 															<string>-∞</string>
 															<string/>
@@ -617,14 +617,14 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 													</object>
 													<object class="NSAttributedString" key="NS.nan">
 														<string key="NSString">NaN</string>
-														<object class="NSDictionary" key="NSAttributes">
+														<object class="NSDictionary" key="NSAttributes" id="359927156">
 															<bool key="EncodedWithXMLCoder">YES</bool>
 															<reference key="dict.sortedKeys" ref="0"/>
 															<reference key="dict.values" ref="0"/>
 														</object>
 													</object>
-													<real value="0.0" key="NS.min"/>
-													<real value="365" key="NS.max"/>
+													<real value="2" key="NS.min"/>
+													<real value="999" key="NS.max"/>
 													<object class="NSDecimalNumberHandler" key="NS.rounding">
 														<bool key="NS.raise.overflow">YES</bool>
 														<bool key="NS.raise.underflow">YES</bool>
@@ -646,7 +646,7 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 										<object class="NSButton" id="61886950">
 											<reference key="NSNextResponder" ref="619943765"/>
 											<int key="NSvFlags">268</int>
-											<string key="NSFrame">{{15, 109}, {146, 26}}</string>
+											<string key="NSFrame">{{15, 91}, {146, 26}}</string>
 											<reference key="NSSuperview" ref="619943765"/>
 											<reference key="NSWindow"/>
 											<reference key="NSNextKeyView" ref="149517148"/>
@@ -675,7 +675,7 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 										<object class="NSButton" id="149517148">
 											<reference key="NSNextResponder" ref="619943765"/>
 											<int key="NSvFlags">268</int>
-											<string key="NSFrame">{{15, 89}, {187, 18}}</string>
+											<string key="NSFrame">{{15, 71}, {187, 18}}</string>
 											<reference key="NSSuperview" ref="619943765"/>
 											<reference key="NSWindow"/>
 											<reference key="NSNextKeyView" ref="575672330"/>
@@ -699,34 +699,100 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 										<object class="NSTextField" id="575672330">
 											<reference key="NSNextResponder" ref="619943765"/>
 											<int key="NSvFlags">268</int>
-											<string key="NSFrame">{{33, 44}, {277, 39}}</string>
+											<string key="NSFrame">{{40, 14}, {187, 51}}</string>
 											<reference key="NSSuperview" ref="619943765"/>
 											<reference key="NSWindow"/>
 											<reference key="NSNextKeyView" ref="815631923"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTextFieldCell" key="NSCell" id="686762725">
 												<int key="NSCellFlags">67239424</int>
-												<int key="NSCellFlags2">272629760</int>
+												<int key="NSCellFlags2">272633856</int>
 												<string key="NSContents">How many days before your password expires do you want to be warned?</string>
 												<reference key="NSSupport" ref="165797821"/>
 												<reference key="NSControlView" ref="575672330"/>
 												<reference key="NSBackgroundColor" ref="700812549"/>
-												<reference key="NSTextColor" ref="1037715661"/>
+												<reference key="NSTextColor" ref="95400874"/>
 											</object>
 										</object>
 										<object class="NSTextField" id="815631923">
 											<reference key="NSNextResponder" ref="619943765"/>
 											<int key="NSvFlags">268</int>
-											<string key="NSFrame">{{36, 14}, {50, 22}}</string>
+											<string key="NSFrame">{{232, 28}, {50, 22}}</string>
 											<reference key="NSSuperview" ref="619943765"/>
 											<reference key="NSWindow"/>
 											<reference key="NSNextKeyView" ref="729690067"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSTextFieldCell" key="NSCell" id="865650446">
-												<int key="NSCellFlags">-1804468671</int>
-												<int key="NSCellFlags2">272630784</int>
+												<int key="NSCellFlags">-1267597759</int>
+												<int key="NSCellFlags2">-1874852864</int>
 												<string key="NSContents"/>
 												<reference key="NSSupport" ref="165797821"/>
+												<object class="NSNumberFormatter" key="NSFormatter" id="1057508150">
+													<object class="NSMutableDictionary" key="NS.attributes">
+														<bool key="EncodedWithXMLCoder">YES</bool>
+														<object class="NSArray" key="dict.sortedKeys">
+															<bool key="EncodedWithXMLCoder">YES</bool>
+															<string>allowsFloats</string>
+															<string>formatterBehavior</string>
+															<string>groupingSize</string>
+															<string>lenient</string>
+															<string>maximum</string>
+															<string>maximumIntegerDigits</string>
+															<string>minimum</string>
+															<string>multiplier</string>
+															<string>negativeInfinitySymbol</string>
+															<string>nilSymbol</string>
+															<string>numberStyle</string>
+															<string>positiveInfinitySymbol</string>
+															<string>roundingIncrement</string>
+															<string>roundingMode</string>
+															<string>usesGroupingSeparator</string>
+														</object>
+														<object class="NSMutableArray" key="dict.values">
+															<bool key="EncodedWithXMLCoder">YES</bool>
+															<boolean value="NO"/>
+															<integer value="1040"/>
+															<integer value="3"/>
+															<boolean value="NO"/>
+															<real value="999"/>
+															<integer value="3"/>
+															<real value="1"/>
+															<real value="1"/>
+															<string>-∞</string>
+															<string/>
+															<integer value="1"/>
+															<string>+∞</string>
+															<real value="1"/>
+															<integer value="6"/>
+															<boolean value="YES"/>
+														</object>
+													</object>
+													<string key="NS.positiveformat">#,##1.###</string>
+													<string key="NS.negativeformat">#,##1.###</string>
+													<nil key="NS.positiveattrs"/>
+													<nil key="NS.negativeattrs"/>
+													<nil key="NS.zero"/>
+													<object class="NSAttributedString" key="NS.nil">
+														<string key="NSString"/>
+													</object>
+													<object class="NSAttributedString" key="NS.nan">
+														<string key="NSString">NaN</string>
+														<reference key="NSAttributes" ref="359927156"/>
+													</object>
+													<real value="1" key="NS.min"/>
+													<real value="999" key="NS.max"/>
+													<object class="NSDecimalNumberHandler" key="NS.rounding">
+														<bool key="NS.raise.overflow">YES</bool>
+														<bool key="NS.raise.underflow">YES</bool>
+														<bool key="NS.raise.dividebyzero">YES</bool>
+													</object>
+													<string key="NS.decimal">.</string>
+													<string key="NS.thousand">,</string>
+													<bool key="NS.hasthousands">YES</bool>
+													<bool key="NS.localized">YES</bool>
+													<bool key="NS.allowsfloats">NO</bool>
+												</object>
+												<string key="NSPlaceholderString">days</string>
 												<reference key="NSControlView" ref="815631923"/>
 												<bool key="NSDrawsBackground">YES</bool>
 												<reference key="NSBackgroundColor" ref="1005720897"/>
@@ -734,14 +800,14 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 											</object>
 										</object>
 									</object>
-									<string key="NSFrame">{{6, 1}, {325, 195}}</string>
+									<string key="NSFrame">{{6, 1}, {325, 177}}</string>
 									<reference key="NSSuperview" ref="982533165"/>
 									<reference key="NSWindow"/>
 									<reference key="NSNextKeyView" ref="449920734"/>
 								</object>
 							</object>
-							<string key="NSFrame">{{17, 92}, {327, 197}}</string>
-							<string key="NSBounds">{{5, 0}, {327, 197}}</string>
+							<string key="NSFrame">{{17, 92}, {327, 179}}</string>
+							<string key="NSBounds">{{5, 0}, {327, 179}}</string>
 							<reference key="NSSuperview" ref="439893737"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="619943765"/>
@@ -876,12 +942,12 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 							<bool key="NSTransparent">NO</bool>
 						</object>
 					</object>
-					<string key="NSFrame">{{7, 11}, {361, 358}}</string>
+					<string key="NSFrame">{{7, 11}, {361, 340}}</string>
 					<reference key="NSSuperview"/>
 					<reference key="NSWindow"/>
 					<reference key="NSNextKeyView" ref="358186130"/>
 				</object>
-				<string key="NSScreenRect">{{0, 0}, {1920, 1178}}</string>
+				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
 				<string key="NSMaxSize">{1e+13, 1e+13}</string>
 			</object>
 			<object class="NSCustomObject" id="976324537">
@@ -1249,14 +1315,6 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 					<int key="connectionID">835</int>
 				</object>
 				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">toggleGrowl:</string>
-						<reference key="source" ref="976324537"/>
-						<reference key="destination" ref="149517148"/>
-					</object>
-					<int key="connectionID">836</int>
-				</object>
-				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
 						<string key="label">value: values.growlEnabled</string>
 						<reference key="source" ref="149517148"/>
@@ -1315,6 +1373,14 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 						<reference key="destination" ref="815631923"/>
 					</object>
 					<int key="connectionID">857</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">selectText:</string>
+						<reference key="source" ref="815631923"/>
+						<reference key="destination" ref="149517148"/>
+					</object>
+					<int key="connectionID">859</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -1609,13 +1675,13 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<reference ref="149517148"/>
-							<reference ref="292107413"/>
 							<reference ref="61886950"/>
 							<reference ref="449920734"/>
 							<reference ref="432381602"/>
 							<reference ref="799948682"/>
 							<reference ref="575672330"/>
 							<reference ref="815631923"/>
+							<reference ref="292107413"/>
 						</object>
 						<reference key="parent" ref="439893737"/>
 					</object>
@@ -1811,7 +1877,16 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 					<object class="IBObjectRecord">
 						<int key="objectID">847</int>
 						<reference key="object" ref="865650446"/>
+						<object class="NSMutableArray" key="children">
+							<bool key="EncodedWithXMLCoder">YES</bool>
+							<reference ref="1057508150"/>
+						</object>
 						<reference key="parent" ref="815631923"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">858</int>
+						<reference key="object" ref="1057508150"/>
+						<reference key="parent" ref="865650446"/>
 					</object>
 				</object>
 			</object>
@@ -1902,6 +1977,7 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 					<string>738.IBPluginDependency</string>
 					<string>739.IBAttributePlaceholdersKey</string>
 					<string>739.IBPluginDependency</string>
+					<string>740.IBAttributePlaceholdersKey</string>
 					<string>740.IBPluginDependency</string>
 					<string>741.IBPluginDependency</string>
 					<string>742.IBAttributePlaceholdersKey</string>
@@ -1933,8 +2009,13 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 					<string>83.ImportedFromIB2</string>
 					<string>844.IBPluginDependency</string>
 					<string>845.IBPluginDependency</string>
+					<string>846.IBAttributePlaceholdersKey</string>
 					<string>846.IBPluginDependency</string>
 					<string>847.IBPluginDependency</string>
+					<string>858.IBNumberFormatterBehaviorMetadataKey</string>
+					<string>858.IBNumberFormatterLocalizesFormatMetadataKey</string>
+					<string>858.IBNumberFormatterSampleNumberKey</string>
+					<string>858.IBPluginDependency</string>
 					<string>92.IBPluginDependency</string>
 					<string>92.ImportedFromIB2</string>
 				</object>
@@ -2033,10 +2114,18 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 						<object class="IBToolTipAttribute" key="NS.object.0">
 							<string key="name">ToolTip</string>
 							<reference key="object" ref="61886950"/>
-							<string key="toolTip">Select this to start ADPassMon automatically on each login</string>
+							<string key="toolTip">Check this to start ADPassMon automatically on each login</string>
 						</object>
 					</object>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<object class="NSMutableDictionary">
+						<string key="NS.key.0">ToolTip</string>
+						<object class="IBToolTipAttribute" key="NS.object.0">
+							<string key="name">ToolTip</string>
+							<reference key="object" ref="149517148"/>
+							<string key="toolTip">Select this to enable Growl notifications for upcoming password expiration </string>
+						</object>
+					</object>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<object class="NSMutableDictionary">
@@ -2082,7 +2171,16 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 					<integer value="1"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<object class="NSMutableDictionary">
+						<bool key="EncodedWithXMLCoder">YES</bool>
+						<reference key="dict.sortedKeys" ref="0"/>
+						<reference key="dict.values" ref="0"/>
+					</object>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
+					<integer value="1040"/>
+					<boolean value="YES"/>
+					<real value="1111"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<integer value="1"/>
@@ -2100,7 +2198,7 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 				<reference key="dict.values" ref="0"/>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">857</int>
+			<int key="maxID">859</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -2118,12 +2216,13 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 							<string>applicationWillTerminate:</string>
 							<string>changePassword:</string>
 							<string>compareDates:</string>
-							<string>computerDidWake:</string>
 							<string>doKerbCheck:</string>
 							<string>doProcess:</string>
 							<string>getDNS:</string>
 							<string>getExpirationDate:</string>
 							<string>getExpireAge:</string>
+							<string>getOS:</string>
+							<string>getPwdSetDate:</string>
 							<string>getSearchBase:</string>
 							<string>growlNotify:</string>
 							<string>growlSetup:</string>
@@ -2165,6 +2264,7 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>
+							<string>id</string>
 						</object>
 					</object>
 					<object class="NSMutableDictionary" key="actionInfosByName">
@@ -2177,12 +2277,13 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 							<string>applicationWillTerminate:</string>
 							<string>changePassword:</string>
 							<string>compareDates:</string>
-							<string>computerDidWake:</string>
 							<string>doKerbCheck:</string>
 							<string>doProcess:</string>
 							<string>getDNS:</string>
 							<string>getExpirationDate:</string>
 							<string>getExpireAge:</string>
+							<string>getOS:</string>
+							<string>getPwdSetDate:</string>
 							<string>getSearchBase:</string>
 							<string>growlNotify:</string>
 							<string>growlSetup:</string>
@@ -2224,10 +2325,6 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
-								<string key="name">computerDidWake:</string>
-								<string key="candidateClassName">id</string>
-							</object>
-							<object class="IBActionInfo">
 								<string key="name">doKerbCheck:</string>
 								<string key="candidateClassName">id</string>
 							</object>
@@ -2245,6 +2342,14 @@ AAMAAAABAAEAAAFTAAMAAAAEAAAFwgAAAAAACAAIAAgACAABAAEAAQABA</bytes>
 							</object>
 							<object class="IBActionInfo">
 								<string key="name">getExpireAge:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">getOS:</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBActionInfo">
+								<string key="name">getPwdSetDate:</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
