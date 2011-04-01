@@ -8,8 +8,11 @@
 
 -- FEATURE REQUESTS
 --
--- * add a Kerberos Ticket Release/Renew function (Rich Trouton) -- Done!
--- * add Preferences lock function, leaving Growl exposed (Rusty Myers) -- Done!
+-- * add a Kerberos Ticket Release/Renew function (Rich Trouton) -- Lion in progress
+--
+-- WHERE I LEFT OFF
+--
+-- * line 206 block - Lion kerberos function
 --
 
 script ADPassMonAppDelegate
@@ -20,18 +23,20 @@ script ADPassMonAppDelegate
 	property NSMenuItem : class "NSMenuItem"
     property timerClass : class "NSTimer" -- so we can do stuff at regular intervals
     property pNSWorkspace : class "NSWorkspace" -- for sleep notification
-    property NSBundle : class "NSBundle" of current application -- for referencing files within the app bundle
+    property NSBundle : class "NSBundle" of current application -- for referencing files within the app bundle (NOT USED)
 
 --- Objects
     property standardUserDefaults : missing value
     property statusMenu : missing value
     property statusMenuController : missing value
     property theWindow : missing value
+    property passPanel : missing value
     property defaults : missing value -- for saved prefs
     property theMessage : missing value -- for stats display in pref window -- consider removing
     property manualExpireDays : missing value
     property selectedMethod : missing value
     property warningDays : missing value
+    property thePassword : missing value
 
 --- Booleans
     property isIdle : true
@@ -107,25 +112,27 @@ script ADPassMonAppDelegate
         end tell
         
         if isGrowlRunning is true then
+            log "isGrowlRunning: " & isGrowlRunning
+            statusMenu's itemWithTitle_("Use Growl Alerts")'s setEnabled_(isGrowlRunning)
             tell application "GrowlHelperApp"
-                -- Make a list of all the notification types 
-                -- that this script will ever send:
+                -- Make a list of all notification types that this script will ever send:
                 set the allNotificationsList to ¬
                 {"Default Notification"}
                 
-                -- Make a list of the notifications 
-                -- that will be enabled by default.      
-                -- Those not enabled by default can be enabled later 
-                -- in the 'Applications' tab of the growl prefpane.
+                -- Make a list of the enabled notifications. Others can be enabled in Growl prefs.
                 set the enabledNotificationsList to ¬
                 {"Default Notification"}
                 
-                -- Register with growl
-                register as application ¬
-                "ADPassMon" all notifications allNotificationsList ¬
+                -- Register with Growl
+                register as application "ADPassMon" ¬
+                all notifications allNotificationsList ¬
                 default notifications enabledNotificationsList ¬
                 icon of application "ADPassMon"
             end tell
+        else -- if Growl is not running
+            set my growlEnabled to false
+            tell defaults to setObject_forKey_(growlEnabled, "growlEnabled")
+            statusMenu's itemWithTitle_("Use Growl Alerts")'s setEnabled_(isGrowlRunning)
         end if
     end growlSetup_
     
@@ -138,7 +145,8 @@ script ADPassMonAppDelegate
                     notify with name "Default Notification" ¬
                     title "Password Expiration Warning" ¬
                     description "Your password will expire in " & sender & " days on " & expirationDate ¬
-                    application name "ADPassMon" icon of application "ADPassMon.app"
+                    application name "ADPassMon" ¬
+                    icon of application "ADPassMon.app"
                 end tell
             end if
         end if
@@ -152,44 +160,34 @@ script ADPassMonAppDelegate
     
     -- Checks for kerberos ticket, necessary for auto method. Also bound to Re-check menu and Prefs window items.
     on doKerbCheck_(sender)
-        if skipKerb is false
+        if skipKerb is false then
             if selectedMethod = 0 then
-                try
-                    log "Testing for kerb ticket"
-                    set kerb to do shell script "/usr/bin/klist -s"
-                    set renewKerb to do shell script "/usr/bin/kinit -R"
-                    log "Kerb ticket found"
-                    set my isIdle to true
-                    retrieveDefaults_(me)
-                    doProcess_(me)
-                on error theError
-                    set my theMessage to "Kerberos ticket expired or not found!"
-                    log "No kerberos ticket found"
-                    updateMenuTitle_("[ ! ]", "Kerberos ticket expired or not found!")
-                    -- offer to renew Kerberos ticket
-                    activate
-                    set response to (display dialog "No Kerberos ticket was found. Do you want to renew it?" with icon 1 buttons {"No","Yes"} default button "Yes")
-                    if button returned of response is "Yes" then
-                        if my osVersion is greater than 6 then -- need to handle 10.7 specially
-                            set iAm to (do shell script "whoami") as string
-                            set myDomain to (do shell script "dsconfigad -show | awk -F'= ' '/Active Directory Domain/{print $2}' | tr '[:lower:]' '[:upper:]'") as string
-                            set kerbID to (iAm & "@" & myDomain) as string
-                            tell application "Ticket Viewer"
-                                activate
-                                tell application "System Events"
-                                    keystroke "n" using {command down}
-                                    keystroke kerbID
-                                    keystroke tab
-                                end tell
-                            end tell
-                        else -- if osVersion is 6 or less
-                            do shell script "/bin/echo '' | /usr/bin/kinit -l 24h &" -- Displays a password dialog in 10.6 (and maybe 10.5?)
+                if osVersion is less than 7 then
+                    try
+                        log "Testing for kerb ticket"
+                        set kerb to do shell script "/usr/bin/klist | /usr/bin/grep krbtgt"
+                        set renewKerb to do shell script "/usr/bin/kinit -R"
+                        log "Kerb ticket found"
+                        set my isIdle to true
+                        retrieveDefaults_(me)
+                        doProcess_(me)
+                    on error theError
+                        set my theMessage to "Kerberos ticket expired or not found!"
+                        log "No kerberos ticket found"
+                        updateMenuTitle_("[ ! ]", "Kerberos ticket expired or not found!")
+                        -- offer to renew Kerberos ticket
+                        activate
+                        set response to (display dialog "No Kerberos ticket was found. Do you want to renew it?" with icon 1 buttons {"No","Yes"} default button "Yes")
+                        if button returned of response is "Yes" then
+                            do shell script "/bin/echo '' | /usr/bin/kinit -l 24h -r 24h &" -- Displays a password dialog in 10.6 (and maybe 10.5?)
+                            doKerbCheck_(me) -- Rerun the handler to verify kerb ticket and call doProcess
+                        else -- if No is clicked
+                            errorOut_(theError, 1)
                         end if
-                        doKerbCheck_(me) -- Rerun the handler to verify kerb ticket and call doProcess
-                    else -- if No is clicked
-                        errorOut_(theError, 1)
-                    end if
-                end try
+                    end try
+                else -- if osVersion is 7 or greater
+                    doLionKerb_(me)
+                end if
             else -- if selectedMethod = 1
                 doProcess_(me)
             end if
@@ -197,6 +195,53 @@ script ADPassMonAppDelegate
             doProcess_(me)
         end if
     end doKerbCheck_
+    
+    -- Runs when Password dialog box is confirmed.
+    on renewLionKerb_(sender)
+        do shell script "/bin/echo '" & thePassword & "' | /usr/bin/kinit -l 24h -r 24h --password-file=STDIN"
+        doLionKerb_(me)
+    end renewLionKerb_
+
+    -- Need to handle Lion's kerberos differently
+    on doLionKerb_(sender)
+        try
+            log "Testing for kerb ticket"
+            set kerb to do shell script "/usr/bin/klist | /usr/bin/grep krbtgt"
+            set renewKerb to do shell script "/usr/bin/kinit -R"
+            log "Kerb ticket found"
+            set my isIdle to true
+            retrieveDefaults_(me)
+            doProcess_(me)
+        on error theError
+            set my theMessage to "Kerberos ticket expired or not found!"
+            log "No kerberos ticket found"
+            updateMenuTitle_("[ ! ]", "Kerberos ticket expired or not found!")
+            -- offer to renew Kerberos ticket
+            activate
+            set response to (display dialog "No Kerberos ticket was found. Do you want to renew it?" with icon 1 buttons {"No","Yes"} default button "Yes")
+            if button returned of response is "Yes" then
+                activate
+                passPanel's makeKeyAndOrderFront_(null)
+                
+                --do shell script "/bin/echo '" & thePassword & "'|/usr/bin/kinit -l 24h -r 24h --password-file=STDIN"
+                
+                --set iAm to (do shell script "whoami") as string
+                --set myDomain to (do shell script "dsconfigad -show | awk -F'= ' '/Active Directory Domain/{print $2}' | tr '[:lower:]' '[:upper:]'") as string
+                --set kerbID to (iAm & "@" & myDomain) as string
+                --tell application "Ticket Viewer"
+                --    activate
+                --    tell application "System Events"
+                --        keystroke "n" using {command down}
+                --        keystroke kerbID
+                --        keystroke tab
+                --        keystroke thePassword
+                --    end tell
+                --end tell
+            else -- if No is clicked
+                errorOut_(theError, 1)
+            end if
+        end try
+    end doLionKerb_
     
     -- Use scutil to get AD DNS info
     on getDNS_(sender)
@@ -304,7 +349,7 @@ script ADPassMonAppDelegate
             getPwdSetDate_(me)
             compareDates_(me)
             getExpirationDate_(daysUntilExp)
-            updateMenuTitle_("[" & daysUntilExpNice & "d]", "AD Password expires on " & expirationDate)
+            updateMenuTitle_("[" & daysUntilExpNice & "d]", "Password expires on " & expirationDate)
             
 			set my theMessage to "Your password will expire in " & daysUntilExpNice & " days on
 " & expirationDate
@@ -317,7 +362,7 @@ script ADPassMonAppDelegate
 		end try
 	end doProcess_
 
---- GUI BINDING HANDLERS
+--- INTERFACE BINDING HANDLERS
 
     -- Bound to About item
     on about_(sender)
@@ -418,26 +463,21 @@ script ADPassMonAppDelegate
         getOS_(me)
         watchForWake_(me)
         regDefaults_(me) -- populate plist file with defaults (will not overwrite non-default settings)
-        retrieveDefaults_(me)
         growlSetup_(me)
-        if expireAge = 0 then -- if we haven't yet discovered the password expiration age, check for kerberos ticket first
-            if my selectedMethod = 0 then
-                set my theMessage to "Checking for Kerberos ticket..."
-                doKerbCheck_(me)
-            end if
-        else
-            retrieveDefaults_(me)
-            if my selectedMethod is 1 then
-                set my manualExpireDays to expireAge
-                set my isHidden to true
-                set my isManualEnabled to true
-            else if my selectedMethod is 0 then
-                set my isHidden to false
-                set my isManualEnabled to false
-                set my manualExpireDays to ""
-            end if
-            doProcess_(me)
+        retrieveDefaults_(me)
+        if my expireAge = 0 and my selectedMethod = 0 then -- if we're using Auto and we don't have the password expiration age, check for kerberos ticket
+            set my theMessage to "Checking for Kerberos ticket..."
+            doKerbCheck_(me)
+        else if my selectedMethod is 1 then
+            set my manualExpireDays to expireAge
+            set my isHidden to true
+            set my isManualEnabled to true
+        else if my selectedMethod is 0 then
+            set my isHidden to false
+            set my isManualEnabled to false
+            set my manualExpireDays to ""
         end if
+        doProcess_(me)
 
         -- Set up a timer to trigger doProcess handler every 12 hours. Will also spawn Growl notifications if enabled.
         timerClass's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(43200, me, "doProcess:", missing value, true)
@@ -459,7 +499,7 @@ script ADPassMonAppDelegate
         menuItem's setTitle_("Use Growl Alerts")
 		menuItem's setTarget_(me)
 		menuItem's setAction_("toggleGrowl:")
-        menuItem's setEnabled_(true)
+        menuItem's setEnabled_(isGrowlRunning)
         menuItem's setState_(growlEnabled)
         statusMenu's addItem_(menuItem)
 		menuItem's release()
