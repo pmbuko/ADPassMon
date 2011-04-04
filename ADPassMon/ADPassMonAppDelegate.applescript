@@ -8,11 +8,7 @@
 
 -- FEATURE REQUESTS
 --
--- * add a Kerberos Ticket Release/Renew function (Rich Trouton) -- Lion in progress
---
--- WHERE I LEFT OFF
---
--- * line 206 block - Lion kerberos function
+-- * add a Kerberos Ticket Release/Renew function (Rich Trouton) -- Done!
 --
 
 script ADPassMonAppDelegate
@@ -23,14 +19,13 @@ script ADPassMonAppDelegate
 	property NSMenuItem : class "NSMenuItem"
     property timerClass : class "NSTimer" -- so we can do stuff at regular intervals
     property pNSWorkspace : class "NSWorkspace" -- for sleep notification
-    property NSBundle : class "NSBundle" of current application -- for referencing files within the app bundle (NOT USED)
+    --property NSBundle : class "NSBundle" of current application -- for referencing files within the app bundle (NOT USED)
 
 --- Objects
     property standardUserDefaults : missing value
     property statusMenu : missing value
     property statusMenuController : missing value
     property theWindow : missing value
-    property passPanel : missing value
     property defaults : missing value -- for saved prefs
     property theMessage : missing value -- for stats display in pref window -- consider removing
     property manualExpireDays : missing value
@@ -63,9 +58,6 @@ script ADPassMonAppDelegate
     property daysUntilExp : ""
     property daysUntilExpNice : ""
     property expirationDate : ""
-    property iAm : ""
-    property myDomain : ""
-    property kerbID : ""
 
 --- HANDLERS
     
@@ -98,6 +90,7 @@ script ADPassMonAppDelegate
     -- Get values from plist
 	on retrieveDefaults_(sender)
         tell defaults to set my selectedMethod to objectForKey_("selectedMethod") as integer
+        tell defaults to set my isManualEnabled to objectForKey_("isManualEnabled") as integer
 		tell defaults to set my expireAge to objectForKey_("expireAge") as integer
 		tell defaults to set my pwdSetDate to objectForKey_("pwdSetDate") as integer
         tell defaults to set my growlEnabled to objectForKey_("growlEnabled")
@@ -113,7 +106,7 @@ script ADPassMonAppDelegate
         
         if isGrowlRunning is true then
             log "isGrowlRunning: " & isGrowlRunning
-            statusMenu's itemWithTitle_("Use Growl Alerts")'s setEnabled_(isGrowlRunning)
+            --statusMenu's itemWithTitle_("Use Growl Alerts")'s setEnabled_(isGrowlRunning)
             tell application "GrowlHelperApp"
                 -- Make a list of all notification types that this script will ever send:
                 set the allNotificationsList to ¬
@@ -132,7 +125,7 @@ script ADPassMonAppDelegate
         else -- if Growl is not running
             set my growlEnabled to false
             tell defaults to setObject_forKey_(growlEnabled, "growlEnabled")
-            statusMenu's itemWithTitle_("Use Growl Alerts")'s setEnabled_(isGrowlRunning)
+            --statusMenu's itemWithTitle_("Use Growl Alerts")'s setEnabled_(isGrowlRunning)
         end if
     end growlSetup_
     
@@ -158,7 +151,7 @@ script ADPassMonAppDelegate
             addObserver_selector_name_object_(me, "doProcess:", "NSWorkspaceDidWakeNotification", missing value)
     end watchForWake_
     
-    -- Checks for kerberos ticket, necessary for auto method. Also bound to Re-check menu and Prefs window items.
+    -- Checks for kerberos ticket, necessary for auto method. Also bound to Refresh Kerb menu item.
     on doKerbCheck_(sender)
         if skipKerb is false then
             if selectedMethod = 0 then
@@ -196,13 +189,7 @@ script ADPassMonAppDelegate
         end if
     end doKerbCheck_
     
-    -- Runs when Password dialog box is confirmed.
-    on renewLionKerb_(sender)
-        do shell script "/bin/echo '" & thePassword & "' | /usr/bin/kinit -l 24h -r 24h --password-file=STDIN"
-        doLionKerb_(me)
-    end renewLionKerb_
-
-    -- Need to handle Lion's kerberos differently
+    -- Need to handle Lion's kerberos differently from older OSes
     on doLionKerb_(sender)
         try
             log "Testing for kerb ticket"
@@ -218,30 +205,38 @@ script ADPassMonAppDelegate
             updateMenuTitle_("[ ! ]", "Kerberos ticket expired or not found!")
             -- offer to renew Kerberos ticket
             activate
-            set response to (display dialog "No Kerberos ticket was found. Do you want to renew it?" with icon 1 buttons {"No","Yes"} default button "Yes")
+            set response to (display dialog "No Kerberos ticket was found. Do you want to renew it?" with icon 2 buttons {"No","Yes"} default button "Yes")
             if button returned of response is "Yes" then
-                activate
-                passPanel's makeKeyAndOrderFront_(null)
-                
-                --do shell script "/bin/echo '" & thePassword & "'|/usr/bin/kinit -l 24h -r 24h --password-file=STDIN"
-                
-                --set iAm to (do shell script "whoami") as string
-                --set myDomain to (do shell script "dsconfigad -show | awk -F'= ' '/Active Directory Domain/{print $2}' | tr '[:lower:]' '[:upper:]'") as string
-                --set kerbID to (iAm & "@" & myDomain) as string
-                --tell application "Ticket Viewer"
-                --    activate
-                --    tell application "System Events"
-                --        keystroke "n" using {command down}
-                --        keystroke kerbID
-                --        keystroke tab
-                --        keystroke thePassword
-                --    end tell
-                --end tell
+				renewLionKerb_(me)
             else -- if No is clicked
                 errorOut_(theError, 1)
             end if
         end try
     end doLionKerb_
+    
+	-- Runs when Yes of Lion kerberos renewal dialog (from above) is clicked.
+	on renewLionKerb_(sender)
+		try
+			set thePassword to text returned of (display dialog "Enter your password:" default answer "" with hidden answer)
+			do shell script "/bin/echo '" & thePassword & "' | /usr/bin/kinit -l 24h -r 24h --password-file=STDIN"
+			display dialog "Kerboros ticket acquired." with icon 1 buttons {"OK"} default button 1
+			doLionKerb_(me)
+        on error
+			repeat with i from 1 to 2
+				try
+					set thePassword to text returned of (display dialog "Password incorrect. Please try again:" default answer "" with icon 2 with hidden answer)
+					do shell script "/bin/echo '" & thePassword & "' | /usr/bin/kinit -l 24h -r 24h --password-file=STDIN"
+					display dialog "Kerboros ticket acquired." with icon 1 buttons {"OK"} default button 1
+					doLionKerb_(me)
+                on error
+					if i = 2 then
+						display dialog "Too many incorrect attempts. Your account may have been locked out." with icon 1 buttons {"OK"} default button 1
+						return
+					end if
+				end try
+			end repeat
+		end try
+	end renewLionKerb_
     
     -- Use scutil to get AD DNS info
     on getDNS_(sender)
@@ -290,13 +285,13 @@ script ADPassMonAppDelegate
             tell defaults to setObject_forKey_(pwdSetDate, "pwdSetDate")
             -- If we can get a valid pwdSetDate, then we're on the network, so enable kerb features
             set my skipKerb to false
-            statusMenu's itemWithTitle_("Get/Renew Kerberos Ticket")'s setEnabled_(true)
+            --statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(true)
         else if plistPwdSetDate is greater than pwdSetDate then
             log "    is < value in plist (" & plistPwdSetDate & ") so we ignore it"
             set my pwdSetDate to plistPwdSetDate
              -- If we can't get a valid pwdSetDate, then we're off the network, so disable kerb features
             set my skipKerb to true
-            statusMenu's itemWithTitle_("Get/Renew Kerberos Ticket")'s setEnabled_(false)
+            --statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(false)
         end if
     end getPwdSetDate_
     
@@ -374,11 +369,11 @@ script ADPassMonAppDelegate
     on changePassword_(sender)
         tell application "System Preferences"
             try -- to use UI scripting
-                if my osVersion is less than or equal to 6 then set current pane to pane "Accounts"
-                if my osVersion is greater than 6 then set current pane to "Users & Groups"
+                set current pane to pane id "com.apple.preferences.users"
                 tell application "System Events"
                     tell application process "System Preferences"
-                        click button "Change Password…" of tab group 1 of window "Accounts"
+                        if my osVersion is less than or equal to 6 then click button "Change Password…" of tab group 1 of window "Accounts"
+                        if my osVersion is greater than 6 then click button "Change Password…" of tab group 1 of window "Users & Groups"
                     end tell
                 end tell
             on error theError
@@ -386,7 +381,6 @@ script ADPassMonAppDelegate
             end try
             activate
         end tell
-        doProcess_(me)
     end changePassword_
     
     -- Bound to Prefs menu item
@@ -403,14 +397,15 @@ script ADPassMonAppDelegate
     -- Bound to Auto radio buttons and Manual text field in Prefs window
     on useManualMethod_(sender)
         log "selectedMethod: " & sender's intValue()
-        if sender's intValue() is not 1 then -- Auto sends value 1
+        if sender's intValue() is not 1 then -- Auto sends value 1 (on), so Manual is selected
             set my isHidden to true
             set my isManualEnabled to true
             set my selectedMethod to 1
             set my expireAge to manualExpireDays as integer
             tell defaults to setObject_forKey_(1, "selectedMethod")
             tell defaults to setObject_forKey_(manualExpireDays, "expireAge")
-        else
+            doProcess_(me)
+        else -- Auto is selected
             set my isHidden to false
             set my isManualEnabled to false
             set my selectedMethod to 0
@@ -420,7 +415,6 @@ script ADPassMonAppDelegate
             tell defaults to setObject_forKey_(0, "selectedMethod")
             tell defaults to setObject_forKey_(0, "expireAge")
             doKerbCheck_(me)
-            doProcess_(me)
         end if
     end useManualMethod_
 
@@ -459,33 +453,9 @@ script ADPassMonAppDelegate
 
 -- INITIAL LOADING SECTION --    
     
-    on awakeFromNib()
-        getOS_(me)
-        watchForWake_(me)
-        regDefaults_(me) -- populate plist file with defaults (will not overwrite non-default settings)
-        growlSetup_(me)
-        retrieveDefaults_(me)
-        if my expireAge = 0 and my selectedMethod = 0 then -- if we're using Auto and we don't have the password expiration age, check for kerberos ticket
-            set my theMessage to "Checking for Kerberos ticket..."
-            doKerbCheck_(me)
-        else if my selectedMethod is 1 then
-            set my manualExpireDays to expireAge
-            set my isHidden to true
-            set my isManualEnabled to true
-        else if my selectedMethod is 0 then
-            set my isHidden to false
-            set my isManualEnabled to false
-            set my manualExpireDays to ""
-        end if
-        doProcess_(me)
-
-        -- Set up a timer to trigger doProcess handler every 12 hours. Will also spawn Growl notifications if enabled.
-        timerClass's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(43200, me, "doProcess:", missing value, true)
-    end awakeFromNib
-        	
-	on applicationWillFinishLaunching_(aNotification)
-		-- Create the status menu items
-		set statusMenu to (my NSMenu's alloc)'s initWithTitle_("statusMenu")
+    -- Creates the status menu and its items
+    on buildMenu_(sender)
+        set statusMenu to (my NSMenu's alloc)'s initWithTitle_("statusMenu")
         statusMenu's setAutoenablesItems_(false)
 		set menuItem to (my NSMenuItem's alloc)'s init
 		menuItem's setTitle_("About ADPassMon…")
@@ -515,21 +485,21 @@ script ADPassMonAppDelegate
 		statusMenu's addItem_(my NSMenuItem's separatorItem)
 		
 		set menuItem to (my NSMenuItem's alloc)'s init
-		menuItem's setTitle_("Get/Renew Kerberos Ticket")
+		menuItem's setTitle_("Refresh Kerberos Ticket")
 		menuItem's setTarget_(me)
 		menuItem's setAction_("doKerbCheck:")
-		menuItem's setEnabled_(true)
+		menuItem's setEnabled_(not skipKerb)
 		statusMenu's addItem_(menuItem)
 		menuItem's release()
         
 		set menuItem to (my NSMenuItem's alloc)'s init
 		menuItem's setTitle_("Re-check Expiration")
 		menuItem's setTarget_(me)
-		menuItem's setAction_("doKerbCheck:")
+		menuItem's setAction_("doProcess:")
 		menuItem's setEnabled_(true)
 		statusMenu's addItem_(menuItem)
 		menuItem's release()
-
+        
 		set menuItem to (my NSMenuItem's alloc)'s init
 		menuItem's setTitle_("Change Password…")
 		menuItem's setTarget_(me)
@@ -547,11 +517,39 @@ script ADPassMonAppDelegate
 		menuItem's setEnabled_(true)
 		statusMenu's addItem_(menuItem)
 		menuItem's release()
-
-		--instantiate the statusItemController object and set it to use the statusMenu we just created
+        
+		-- Instantiate the statusItemController object and set it to use the statusMenu we just created
 		set statusMenuController to (current application's class "StatusMenuController"'s alloc)'s init
 		statusMenuController's createStatusItemWithMenu_(statusMenu)
 		statusMenu's release()
+    end buildMenu_
+    
+    -- Do processes necessary for app initiation
+	on applicationWillFinishLaunching_(aNotification)
+        getOS_(me)
+        watchForWake_(me)
+        regDefaults_(me) -- populate plist file with defaults (will not overwrite non-default settings)
+        growlSetup_(me)
+        retrieveDefaults_(me)
+        
+        buildMenu_(me)
+        
+        if my expireAge = 0 and my selectedMethod = 0 then -- if we're using Auto and we don't have the password expiration age, check for kerberos ticket
+            set my theMessage to "Checking for Kerberos ticket..."
+            doKerbCheck_(me)
+            else if my selectedMethod is 1 then
+            set my manualExpireDays to expireAge
+            set my isHidden to true
+            set my isManualEnabled to true
+            else if my selectedMethod is 0 then
+            set my isHidden to false
+            set my isManualEnabled to false
+            set my manualExpireDays to ""
+        end if
+        doProcess_(me)
+        
+        -- Set up a timer to trigger doProcess handler every 12 hours. Will also spawn Growl notifications if enabled.
+        timerClass's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(43200, me, "doProcess:", missing value, true)
     end applicationWillFinishLaunching_
     
 	on applicationShouldTerminate_(sender)
