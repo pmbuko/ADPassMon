@@ -12,13 +12,15 @@
 --
 
 script ADPassMonAppDelegate
-    
+
+--- PROPERTIES ---    
+
 --- Classes
 	property parent : class "NSObject"
     property NSMenu : class "NSMenu"
 	property NSMenuItem : class "NSMenuItem"
-    property timerClass : class "NSTimer" -- so we can do stuff at regular intervals
-    property pNSWorkspace : class "NSWorkspace" -- for sleep notification
+    property NSTimer : class "NSTimer" -- so we can do stuff at regular intervals
+    property NSWorkspace : class "NSWorkspace" -- for sleep notification
     --property NSBundle : class "NSBundle" of current application -- for referencing files within the app bundle (NOT USED)
 
 --- Objects
@@ -59,7 +61,7 @@ script ADPassMonAppDelegate
     property daysUntilExpNice : ""
     property expirationDate : ""
 
---- HANDLERS
+--- HANDLERS ---
     
     -- General error handler
     on errorOut_(theError, showErr)
@@ -72,6 +74,49 @@ script ADPassMonAppDelegate
     on getOS_(sender)
         set my osVersion to first word of (do shell script "system_profiler SPSoftwareDataType | awk -F. '/System Version/{print $2}'") as integer
     end getOS_
+    
+    -- Tests if Universal Access scripting service is enabled
+    on accTest_(sender)
+        log "Testing Universal Access settings…"
+        tell application "System Events"
+            set accStatus to get UI elements enabled
+        end tell
+        if accStatus is true then
+            log "  Already enabled"
+        else
+            log "  Disabled"
+            accEnable_(me)
+        end if
+    end accTest_
+    
+    -- Enables Universal Access scripting service
+    on accEnable_(sender)
+        if "80" is in (do shell script "/usr/bin/id -G") then
+            activate
+            set response to (display dialog "For best performance, ADPassMon requires that 'access for assistive devices' be enabled.
+        
+Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
+            if button returned of response is "Yes" then
+                log "  Prompting for password"
+                try
+                    tell application "System Events"
+                        activate
+                        set UI elements enabled to true
+                    end tell
+                    log "  Now enabled"
+                    --display dialog "Access for assistive devices is now enabled." buttons {"OK"} default button 1
+                on error theError
+                    log "  Error: " & theError
+                    activate
+                    display dialog "Could not enable access for assistive devices." buttons {"OK"} default button 1
+                end try
+            else
+                log "  User chose not to enable"
+            end if
+        else
+            log "  Skipping because user not an admin"
+        end if
+    end accEnable_
     
     -- Register plist default settings
     on regDefaults_(sender)
@@ -100,21 +145,21 @@ script ADPassMonAppDelegate
     
     -- Register with Growl and set up notification(s)
     on growlSetup_(sender)
+        log "Testing for Growl…"
         tell application "System Events"
             set my isGrowlRunning to (count of (every process whose name is "GrowlHelperApp")) > 0
         end tell
         
         if isGrowlRunning is true then
-            log "isGrowlRunning: " & isGrowlRunning
-            --statusMenu's itemWithTitle_("Use Growl Alerts")'s setEnabled_(isGrowlRunning)
+            log "  Running"
             tell application "GrowlHelperApp"
                 -- Make a list of all notification types that this script will ever send:
                 set the allNotificationsList to ¬
-                {"Default Notification"}
+                {"Password Notification"}
                 
                 -- Make a list of the enabled notifications. Others can be enabled in Growl prefs.
                 set the enabledNotificationsList to ¬
-                {"Default Notification"}
+                {"Password Notification"}
                 
                 -- Register with Growl
                 register as application "ADPassMon" ¬
@@ -123,9 +168,9 @@ script ADPassMonAppDelegate
                 icon of application "ADPassMon"
             end tell
         else -- if Growl is not running
+            log "  Not running"
             set my growlEnabled to false
             tell defaults to setObject_forKey_(growlEnabled, "growlEnabled")
-            --statusMenu's itemWithTitle_("Use Growl Alerts")'s setEnabled_(isGrowlRunning)
         end if
     end growlSetup_
     
@@ -133,9 +178,10 @@ script ADPassMonAppDelegate
     on growlNotify_(sender)
         if sender as integer ≤ my warningDays as integer then
             if (my isGrowlRunning and my growlEnabled) is true then
+                log "Sending Growl notification"
                 tell application "GrowlHelperApp"
                     --	Send a Notification...
-                    notify with name "Default Notification" ¬
+                    notify with name "Password Notification" ¬
                     title "Password Expiration Warning" ¬
                     description "Your password will expire in " & sender & " days on " & expirationDate ¬
                     application name "ADPassMon" ¬
@@ -147,7 +193,7 @@ script ADPassMonAppDelegate
         
     -- Triggers doProcess handler on wake from sleep
     on watchForWake_(sender)
-        tell (pNSWorkspace's sharedWorkspace())'s notificationCenter() to ¬
+        tell (NSWorkspace's sharedWorkspace())'s notificationCenter() to ¬
             addObserver_selector_name_object_(me, "doProcess:", "NSWorkspaceDidWakeNotification", missing value)
     end watchForWake_
     
@@ -157,24 +203,26 @@ script ADPassMonAppDelegate
             if selectedMethod = 0 then
                 if osVersion is less than 7 then
                     try
-                        log "Testing for kerb ticket"
+                        log "Testing for kerberos ticket presence…"
                         set kerb to do shell script "/usr/bin/klist | /usr/bin/grep krbtgt"
                         set renewKerb to do shell script "/usr/bin/kinit -R"
-                        log "Kerb ticket found"
+                        log "  Ticket found and renewed"
                         set my isIdle to true
                         retrieveDefaults_(me)
                         doProcess_(me)
                     on error theError
-                        set my theMessage to "Kerberos ticket expired or not found!"
-                        log "No kerberos ticket found"
-                        updateMenuTitle_("[ ! ]", "Kerberos ticket expired or not found!")
+                        set my theMessage to "Kerberos ticket expired or not found"
+                        log "  No ticket found"
+                        updateMenuTitle_("[ ! ]", "Kerberos ticket expired or not found")
                         -- offer to renew Kerberos ticket
                         activate
                         set response to (display dialog "No Kerberos ticket was found. Do you want to renew it?" with icon 1 buttons {"No","Yes"} default button "Yes")
                         if button returned of response is "Yes" then
                             do shell script "/bin/echo '' | /usr/bin/kinit -l 24h -r 24h &" -- Displays a password dialog in 10.6 (and maybe 10.5?)
+                            log "  Ticket acquired"
                             doKerbCheck_(me) -- Rerun the handler to verify kerb ticket and call doProcess
                         else -- if No is clicked
+                            log "  User chose not to acquire"
                             errorOut_(theError, 1)
                         end if
                     end try
@@ -192,23 +240,24 @@ script ADPassMonAppDelegate
     -- Need to handle Lion's kerberos differently from older OSes
     on doLionKerb_(sender)
         try
-            log "Testing for kerb ticket"
+            log "Testing for Kerberos ticket presence…"
             set kerb to do shell script "/usr/bin/klist | /usr/bin/grep krbtgt"
             set renewKerb to do shell script "/usr/bin/kinit -R"
-            log "Kerb ticket found"
+            log "  Ticket found and renewed"
             set my isIdle to true
             retrieveDefaults_(me)
             doProcess_(me)
         on error theError
-            set my theMessage to "Kerberos ticket expired or not found!"
-            log "No kerberos ticket found"
-            updateMenuTitle_("[ ! ]", "Kerberos ticket expired or not found!")
+            set my theMessage to "Kerberos ticket expired or not found"
+            log "  No ticket found"
+            updateMenuTitle_("[ ! ]", "Kerberos ticket expired or not found")
             -- offer to renew Kerberos ticket
             activate
             set response to (display dialog "No Kerberos ticket was found. Do you want to renew it?" with icon 2 buttons {"No","Yes"} default button "Yes")
             if button returned of response is "Yes" then
 				renewLionKerb_(me)
             else -- if No is clicked
+                log "  User chose not to acquire"
                 errorOut_(theError, 1)
             end if
         end try
@@ -219,22 +268,19 @@ script ADPassMonAppDelegate
 		try
 			set thePassword to text returned of (display dialog "Enter your password:" default answer "" with hidden answer)
 			do shell script "/bin/echo '" & thePassword & "' | /usr/bin/kinit -l 24h -r 24h --password-file=STDIN"
-			display dialog "Kerboros ticket acquired." with icon 1 buttons {"OK"} default button 1
+            log "  Ticket acquired"
+			display dialog "Kerberos ticket acquired." with icon 1 buttons {"OK"} default button 1
 			doLionKerb_(me)
         on error
-			repeat with i from 1 to 2
-				try
-					set thePassword to text returned of (display dialog "Password incorrect. Please try again:" default answer "" with icon 2 with hidden answer)
-					do shell script "/bin/echo '" & thePassword & "' | /usr/bin/kinit -l 24h -r 24h --password-file=STDIN"
-					display dialog "Kerboros ticket acquired." with icon 1 buttons {"OK"} default button 1
-					doLionKerb_(me)
-                on error
-					if i = 2 then
-						display dialog "Too many incorrect attempts. Your account may have been locked out." with icon 1 buttons {"OK"} default button 1
-						return
-					end if
-				end try
-			end repeat
+            try
+                set thePassword to text returned of (display dialog "Password incorrect. Please try again:" default answer "" with icon 2 with hidden answer)
+                do shell script "/bin/echo '" & thePassword & "' | /usr/bin/kinit -l 24h -r 24h --password-file=STDIN"
+                display dialog "Kerboros ticket acquired." with icon 1 buttons {"OK"} default button 1
+                doLionKerb_(me)
+            on error
+                log "  Incorrest password. Skipping."
+                display dialog "Too many incorrect attempts. Stopping to avoid account lockout." with icon 2 buttons {"OK"} default button 1
+            end try
 		end try
 	end renewLionKerb_
     
@@ -285,13 +331,11 @@ script ADPassMonAppDelegate
             tell defaults to setObject_forKey_(pwdSetDate, "pwdSetDate")
             -- If we can get a valid pwdSetDate, then we're on the network, so enable kerb features
             set my skipKerb to false
-            --statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(true)
         else if plistPwdSetDate is greater than pwdSetDate then
             log "    is < value in plist (" & plistPwdSetDate & ") so we ignore it"
             set my pwdSetDate to plistPwdSetDate
              -- If we can't get a valid pwdSetDate, then we're off the network, so disable kerb features
             set my skipKerb to true
-            --statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(false)
         end if
     end getPwdSetDate_
     
@@ -350,14 +394,14 @@ script ADPassMonAppDelegate
 " & expirationDate
             set my isIdle to true
             
-			log "Done"
+			log "Finished processing"
             growlNotify_(daysUntilExpNice)
         on error theError
             errorOut_(theError, 1)
 		end try
 	end doProcess_
 
---- INTERFACE BINDING HANDLERS
+--- INTERFACE BINDING HANDLERS ---
 
     -- Bound to About item
     on about_(sender)
@@ -451,10 +495,10 @@ script ADPassMonAppDelegate
         statusMenuController's updateDisplay()
     end revertDefaults_
 
--- INITIAL LOADING SECTION --    
+--- INITIAL LOADING SECTION ---
     
-    -- Creates the status menu and its items
-    on buildMenu_(sender)
+    -- Creates the status menu and its items, using some values determined by other handlers
+    on createMenu_(sender)
         set statusMenu to (my NSMenu's alloc)'s initWithTitle_("statusMenu")
         statusMenu's setAutoenablesItems_(false)
 		set menuItem to (my NSMenuItem's alloc)'s init
@@ -522,34 +566,35 @@ script ADPassMonAppDelegate
 		set statusMenuController to (current application's class "StatusMenuController"'s alloc)'s init
 		statusMenuController's createStatusItemWithMenu_(statusMenu)
 		statusMenu's release()
-    end buildMenu_
+    end createMenu_
     
     -- Do processes necessary for app initiation
 	on applicationWillFinishLaunching_(aNotification)
+        accTest_(me)
         getOS_(me)
         watchForWake_(me)
         regDefaults_(me) -- populate plist file with defaults (will not overwrite non-default settings)
         growlSetup_(me)
         retrieveDefaults_(me)
         
-        buildMenu_(me)
-        
         if my expireAge = 0 and my selectedMethod = 0 then -- if we're using Auto and we don't have the password expiration age, check for kerberos ticket
             set my theMessage to "Checking for Kerberos ticket..."
             doKerbCheck_(me)
-            else if my selectedMethod is 1 then
+        else if my selectedMethod is 1 then
             set my manualExpireDays to expireAge
             set my isHidden to true
             set my isManualEnabled to true
-            else if my selectedMethod is 0 then
+        else if my selectedMethod is 0 then
             set my isHidden to false
             set my isManualEnabled to false
             set my manualExpireDays to ""
         end if
+        
         doProcess_(me)
+        createMenu_(me) -- this is last so menu items are created as disabled if features are not available
         
         -- Set up a timer to trigger doProcess handler every 12 hours. Will also spawn Growl notifications if enabled.
-        timerClass's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(43200, me, "doProcess:", missing value, true)
+        NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(43200, me, "doProcess:", missing value, true)
     end applicationWillFinishLaunching_
     
 	on applicationShouldTerminate_(sender)
