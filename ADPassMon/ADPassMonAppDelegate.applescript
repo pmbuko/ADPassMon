@@ -6,11 +6,6 @@
 --  Copyright 2011 Peter Bukowinski. All rights reserved.
 --
 
--- FEATURE REQUESTS
---
--- * add a Kerberos Ticket Release/Renew function (Rich Trouton) -- Done!
---
-
 script ADPassMonAppDelegate
 
 --- PROPERTIES ---    
@@ -21,7 +16,6 @@ script ADPassMonAppDelegate
 	property NSMenuItem : class "NSMenuItem"
     property NSTimer : class "NSTimer" -- so we can do stuff at regular intervals
     property NSWorkspace : class "NSWorkspace" -- for sleep notification
-    --property NSBundle : class "NSBundle" of current application -- for referencing files within the app bundle (NOT USED)
 
 --- Objects
     property standardUserDefaults : missing value
@@ -72,7 +66,8 @@ script ADPassMonAppDelegate
     
     -- Need to get the OS version so we can handle Kerberos differently in 10.7
     on getOS_(sender)
-        set my osVersion to first word of (do shell script "system_profiler SPSoftwareDataType | awk -F. '/System Version/{print $2}'") as integer
+        set my osVersion to (do shell script "sw_vers -productVersion | awk -F. '{print $2}'") as integer
+        log "Running on OS 10." & osVersion & ".x"
     end getOS_
     
     -- Tests if Universal Access scripting service is enabled
@@ -89,9 +84,9 @@ script ADPassMonAppDelegate
         end if
     end accTest_
     
-    -- Enables Universal Access scripting service
+    -- Prompts to enable Universal Access scripting service
     on accEnable_(sender)
-        if "80" is in (do shell script "/usr/bin/id -G") then
+        if "80" is in (do shell script "/usr/bin/id -G") then -- checks if user is in admin group
             activate
             set response to (display dialog "For best performance, ADPassMon requires that 'access for assistive devices' be enabled.
         
@@ -110,7 +105,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                     activate
                     display dialog "Could not enable access for assistive devices." buttons {"OK"} default button 1
                 end try
-            else
+            else -- if No is clicked
                 log "  User chose not to enable"
             end if
         else
@@ -179,8 +174,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         if sender as integer ≤ my warningDays as integer then
             if (my isGrowlRunning and my growlEnabled) is true then
                 log "Sending Growl notification"
-                tell application "GrowlHelperApp"
-                    --	Send a Notification...
+                tell application "GrowlHelperApp" -- Send a notification
                     notify with name "Password Notification" ¬
                     title "Password Expiration Warning" ¬
                     description "Your password will expire in " & sender & " days on " & expirationDate ¬
@@ -191,7 +185,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         end if
     end growlNotify_
         
-    -- Triggers doProcess handler on wake from sleep
+    -- Trigger doProcess handler on wake from sleep
     on watchForWake_(sender)
         tell (NSWorkspace's sharedWorkspace())'s notificationCenter() to ¬
             addObserver_selector_name_object_(me, "doProcess:", "NSWorkspaceDidWakeNotification", missing value)
@@ -287,7 +281,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     -- Use scutil to get AD DNS info
     on getDNS_(sender)
         try
-            -- "first word of" added for 10.7 compatibility, which returns more than one item
+            -- "first word of" added for 10.7 compatibility, which may return more than one item
             set my myDNS to first word of (do shell script "/usr/sbin/scutil --dns | /usr/bin/awk '/nameserver\\[1\\]/{print $3}'") as text
             log "  myDNS: " & myDNS
         on error theError
@@ -326,16 +320,19 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         -- Now we compare the plist's value for pwdSetDate to the one we just calculated so
         -- we avoid using an old or bad value (i.e. when pwdLastSet can't be found by dscl)
         tell defaults to set plistPwdSetDate to objectForKey_("pwdSetDate") as real
+        statusMenu's setAutoenablesItems_(false)
         if plistPwdSetDate is less than or equal to pwdSetDate then
             log "    is ≥ value in plist (" & plistPwdSetDate & ") so we use it"
             tell defaults to setObject_forKey_(pwdSetDate, "pwdSetDate")
             -- If we can get a valid pwdSetDate, then we're on the network, so enable kerb features
             set my skipKerb to false
+            statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(not skipKerb)
         else if plistPwdSetDate is greater than pwdSetDate then
             log "    is < value in plist (" & plistPwdSetDate & ") so we ignore it"
             set my pwdSetDate to plistPwdSetDate
              -- If we can't get a valid pwdSetDate, then we're off the network, so disable kerb features
             set my skipKerb to true
+            statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(not skipKerb)
         end if
     end getPwdSetDate_
     
@@ -570,9 +567,8 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     
     -- Do processes necessary for app initiation
 	on applicationWillFinishLaunching_(aNotification)
-        accTest_(me)
         getOS_(me)
-        watchForWake_(me)
+        accTest_(me)
         regDefaults_(me) -- populate plist file with defaults (will not overwrite non-default settings)
         growlSetup_(me)
         retrieveDefaults_(me)
@@ -593,7 +589,9 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         doProcess_(me)
         createMenu_(me) -- this is last so menu items are created as disabled if features are not available
         
-        -- Set up a timer to trigger doProcess handler every 12 hours. Will also spawn Growl notifications if enabled.
+        watchForWake_(me)
+        
+        -- A timer to trigger doProcess handler every 12 hrs and spawn Growl notifications (if enabled).
         NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(43200, me, "doProcess:", missing value, true)
     end applicationWillFinishLaunching_
     
