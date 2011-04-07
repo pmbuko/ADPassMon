@@ -39,7 +39,7 @@ script ADPassMonAppDelegate
     
 --- Other Properties
     property isGrowlRunning : ""
-    property tooltip : "Waiting for data"
+    property tooltip : "Waiting for data…"
     property osVersion : ""
     property kerb : ""
     property myDNS : ""
@@ -59,9 +59,9 @@ script ADPassMonAppDelegate
     
     -- General error handler
     on errorOut_(theError, showErr)
-        log "Error: " & theError
-        if showErr = 1 then set my theMessage to theError as text -- consider removing
-        set isIdle to false
+        log "Script Error: " & theError
+        --if showErr = 1 then set my theMessage to theError as text -- consider removing
+        --set isIdle to false
     end errorOut_
     
     -- Need to get the OS version so we can handle Kerberos differently in 10.7
@@ -207,7 +207,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                     on error theError
                         set my theMessage to "Kerberos ticket expired or not found"
                         log "  No ticket found"
-                        updateMenuTitle_("[ ! ]", "Kerberos ticket expired or not found")
+                        --updateMenuTitle_("[ ! ]", "Kerberos ticket expired or not found")
                         -- offer to renew Kerberos ticket
                         activate
                         set response to (display dialog "No Kerberos ticket was found. Do you want to renew it?" with icon 1 buttons {"No","Yes"} default button "Yes")
@@ -244,7 +244,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         on error theError
             set my theMessage to "Kerberos ticket expired or not found"
             log "  No ticket found"
-            updateMenuTitle_("[ ! ]", "Kerberos ticket expired or not found")
+            --updateMenuTitle_("[ ! ]", "Kerberos ticket expired or not found")
             -- offer to renew Kerberos ticket
             activate
             set response to (display dialog "No Kerberos ticket was found. Do you want to renew it?" with icon 2 buttons {"No","Yes"} default button "Yes")
@@ -367,8 +367,12 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     
     -- The meat of the app; gets the data and does the calculations 
     on doProcess_(sender)
+        if selectedMethod = 0 then
+            log "Starting auto process…"
+        else
+            log "Starting manual process…"
+        end if
 		try
-			log "Processing…"
             theWindow's displayIfNeeded()
 			set my isIdle to false
             set my theMessage to "Working…"
@@ -391,7 +395,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
 " & expirationDate
             set my isIdle to true
             
-			log "Finished processing"
+			log "Finished process"
             growlNotify_(daysUntilExpNice)
         on error theError
             errorOut_(theError, 1)
@@ -572,26 +576,27 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         regDefaults_(me) -- populate plist file with defaults (will not overwrite non-default settings)
         growlSetup_(me)
         retrieveDefaults_(me)
+        createMenu_(me)
         
         if my expireAge = 0 and my selectedMethod = 0 then -- if we're using Auto and we don't have the password expiration age, check for kerberos ticket
-            set my theMessage to "Checking for Kerberos ticket..."
             doKerbCheck_(me)
+            theWindow's makeKeyAndOrderFront_(null) -- open the prefs window when running for first (assumption?) time
+            set my theMessage to "Welcome. Please choose your configuration options."
         else if my selectedMethod is 1 then
             set my manualExpireDays to expireAge
             set my isHidden to true
             set my isManualEnabled to true
+            doProcess_(me)
         else if my selectedMethod is 0 then
             set my isHidden to false
             set my isManualEnabled to false
             set my manualExpireDays to ""
+            doProcess_(me)
         end if
-        
-        doProcess_(me)
-        createMenu_(me) -- this is last so menu items are created as disabled if features are not available
         
         watchForWake_(me)
         
-        -- A timer to trigger doProcess handler every 12 hrs and spawn Growl notifications (if enabled).
+        -- Set a timer to trigger doProcess handler every 12 hrs and spawn Growl notifications (if enabled).
         NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(43200, me, "doProcess:", missing value, true)
     end applicationWillFinishLaunching_
     
