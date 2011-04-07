@@ -60,7 +60,7 @@ script ADPassMonAppDelegate
     -- General error handler
     on errorOut_(theError, showErr)
         log "Script Error: " & theError
-        --if showErr = 1 then set my theMessage to theError as text -- consider removing
+        --if showErr = 1 then set my theMessage to theError as text
         --set isIdle to false
     end errorOut_
     
@@ -494,6 +494,8 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to removeObjectForKey_("prefsLocked")
         retrieveDefaults_(me)
         statusMenuController's updateDisplay()
+        set my theMessage to "ADPassMon has been reset.
+Please choose your configuration options."
     end revertDefaults_
 
 --- INITIAL LOADING SECTION ---
@@ -581,7 +583,8 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         if my expireAge = 0 and my selectedMethod = 0 then -- if we're using Auto and we don't have the password expiration age, check for kerberos ticket
             doKerbCheck_(me)
             theWindow's makeKeyAndOrderFront_(null) -- open the prefs window when running for first (assumption?) time
-            set my theMessage to "Welcome. Please choose your configuration options."
+            set my theMessage to "Welcome!
+Please choose your configuration options."
         else if my selectedMethod is 1 then
             set my manualExpireDays to expireAge
             set my isHidden to true
