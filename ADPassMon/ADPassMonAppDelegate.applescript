@@ -417,8 +417,14 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                 set current pane to pane id "com.apple.preferences.users"
                 tell application "System Events"
                     tell application process "System Preferences"
-                        if my osVersion is less than or equal to 6 then click button "Change Password…" of tab group 1 of window "Accounts"
-                        if my osVersion is greater than 6 then click button "Change Password…" of tab group 1 of window "Users & Groups"
+                        if my osVersion is less than or equal to 6 then
+                            click radio button "Password" of tab group 1 of window "Accounts"
+                            click button "Change Password…" of tab group 1 of window "Accounts"
+                        end if
+                        if my osVersion is greater than 6 then
+                            click radio button "Password" of tab group 1 of window "Users & Groups"
+                            click button "Change Password…" of tab group 1 of window "Users & Groups"
+                        end if
                     end tell
                 end tell
             on error theError
@@ -582,9 +588,12 @@ Please choose your configuration options."
         
         if my expireAge = 0 and my selectedMethod = 0 then -- if we're using Auto and we don't have the password expiration age, check for kerberos ticket
             doKerbCheck_(me)
-            theWindow's makeKeyAndOrderFront_(null) -- open the prefs window when running for first (assumption?) time
-            set my theMessage to "Welcome!
+            if prefsLocked as integer is equal to 0 then -- only display the window if Prefs are not locked
+                log "in the loop"
+                theWindow's makeKeyAndOrderFront_(null) -- open the prefs window when running for first (assumption?) time
+                set my theMessage to "Welcome!
 Please choose your configuration options."
+            end if
         else if my selectedMethod is 1 then
             set my manualExpireDays to expireAge
             set my isHidden to true
