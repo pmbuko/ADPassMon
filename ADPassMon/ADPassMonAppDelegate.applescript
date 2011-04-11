@@ -5,6 +5,7 @@
 --  Created by Peter Bukowinski on 3/24/11.
 --  Copyright 2011 Peter Bukowinski. All rights reserved.
 --
+-- TO DO: possibly revise getSearchBase handler (#294) to only use the last two "DC=" pieces. Comment in handler
 
 script ADPassMonAppDelegate
 
@@ -293,6 +294,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     on getSearchBase_(sender)
         try
             set my mySearchBase to (do shell script "/usr/bin/ldapsearch -LLL -Q -s base -H ldap://" & myDNS & " rootDomainNamingContext | /usr/bin/awk '/rootDomainNamingContext/{print $2}'") as text
+            -- awk -F, '/rootDomainNamingContext/{print $(NF-1)","$NF}' to take only last two search base fields
             log "  mySearchBase: " & mySearchBase
         on error theError
             errorOut_(theError, 1)
