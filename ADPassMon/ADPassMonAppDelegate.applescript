@@ -5,7 +5,11 @@
 --  Created by Peter Bukowinski on 3/24/11.
 --  Copyright 2011 Peter Bukowinski. All rights reserved.
 --
--- TO DO: possibly revise getSearchBase handler (#294) to only use the last two "DC=" pieces. Comment in handler
+-- TO DO:
+-- - possibly revise getSearchBase handler (#294) to only use the last two "DC=" pieces. Comment in handler
+--
+-- FEATURE REQUESTS:
+-- - enable mcx defaults hook for adding as login item.
 
 script ADPassMonAppDelegate
 
@@ -36,6 +40,7 @@ script ADPassMonAppDelegate
     property isManualEnabled : false
     property growlEnabled : false
     property prefsLocked : false
+    property launchAtLogin : false
     property skipKerb : false
     
 --- Other Properties
@@ -125,7 +130,8 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                                             pwdSetDate:0, ¬
                                             growlEnabled:growlEnabled, ¬
                                             warningDays:14, ¬
-                                            prefsLocked:prefsLocked})
+                                            prefsLocked:prefsLocked, ¬
+                                            launchAtLogin:launchAtLogin})
     end regDefaults_
     
     -- Get values from plist
@@ -137,7 +143,15 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to set my growlEnabled to objectForKey_("growlEnabled")
         tell defaults to set my warningDays to objectForKey_("warningDays")
         tell defaults to set my prefsLocked to objectForKey_("prefsLocked")
+        tell defaults to set my launchAtLogin to objectForKey_("launchAtLogin")
 	end retrieveDefaults_
+    
+    -- Check if app should be added to login items via MCX
+    --on loginCheck_(sender)
+    --    if launchAtLogin is true then
+    --        
+    --    end  if
+    --end loginCheck_
     
     -- Register with Growl and set up notification(s)
     on growlSetup_(sender)

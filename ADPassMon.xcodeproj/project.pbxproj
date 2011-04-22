@@ -15,6 +15,7 @@
 		39094F381338DBE4007821C2 /* ADPassMonAppDelegate.applescript in Sources */ = {isa = PBXBuildFile; fileRef = 39094F371338DBE4007821C2 /* ADPassMonAppDelegate.applescript */; };
 		39094F3B1338DBE4007821C2 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39094F391338DBE4007821C2 /* MainMenu.xib */; };
 		3910E5881341116300E7EE50 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 3910E5871341116300E7EE50 /* icon.icns */; };
+		3912DBC5136124B100790F51 /* README in Resources */ = {isa = PBXBuildFile; fileRef = 3912DBC4136124B100790F51 /* README */; };
 		39925B9F133CE6E8001C9566 /* LaunchAtLoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = 39925B9E133CE6E8001C9566 /* LaunchAtLoginController.m */; };
 		39925BA8133D061A001C9566 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39925BA7133D061A001C9566 /* Growl.framework */; };
 		39925BAA133D0655001C9566 /* Growl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 39925BA7133D061A001C9566 /* Growl.framework */; };
@@ -49,6 +50,7 @@
 		39094F371338DBE4007821C2 /* ADPassMonAppDelegate.applescript */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.applescript; name = ADPassMonAppDelegate.applescript; path = ADPassMon/ADPassMonAppDelegate.applescript; sourceTree = "<group>"; };
 		39094F3A1338DBE4007821C2 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		3910E5871341116300E7EE50 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = icon.icns; path = ../icon.icns; sourceTree = "<group>"; };
+		3912DBC4136124B100790F51 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = README; sourceTree = "<group>"; };
 		39925B9D133CE6E8001C9566 /* LaunchAtLoginController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LaunchAtLoginController.h; sourceTree = "<group>"; };
 		39925B9E133CE6E8001C9566 /* LaunchAtLoginController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LaunchAtLoginController.m; sourceTree = "<group>"; };
 		39925BA7133D061A001C9566 /* Growl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Growl.framework; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 		39094F2C1338DBE4007821C2 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				3912DBC4136124B100790F51 /* README */,
 				3910E5871341116300E7EE50 /* icon.icns */,
 				39094F2D1338DBE4007821C2 /* ADPassMon-Info.plist */,
 				39094F2E1338DBE4007821C2 /* InfoPlist.strings */,
@@ -195,6 +198,7 @@
 				39094F361338DBE4007821C2 /* Credits.rtf in Resources */,
 				39094F3B1338DBE4007821C2 /* MainMenu.xib in Resources */,
 				3910E5881341116300E7EE50 /* icon.icns in Resources */,
+				3912DBC5136124B100790F51 /* README in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
