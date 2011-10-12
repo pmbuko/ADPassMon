@@ -317,7 +317,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     on getDNS_(sender)
         try
             -- "first word of" added for 10.7 compatibility, which may return more than one item
-            set my myDNS to first word of (do shell script "/usr/sbin/scutil --dns | /usr/bin/awk '/nameserver\\[1\\]/{print $3}'") as text
+            set my myDNS to first word of (do shell script "/usr/sbin/scutil --dns | /usr/bin/awk '/nameserver\\[0\\]/{print $3}'") as text
             log "  myDNS: " & myDNS
         on error theError
             errorOut_(theError)
