@@ -177,12 +177,12 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     on growlSetup_(sender)
         log "Testing for Growl…"
         tell application "System Events"
-            set my isGrowlRunning to (count of (every process whose name is "GrowlHelperApp")) > 0
+            set my isGrowlRunning to (count of (every process whose bundle identifier is "com.Growl.GrowlHelperApp")) > 0
         end tell
         
         if isGrowlRunning is true then
             log "  Running"
-            tell application "GrowlHelperApp"
+            tell application id "com.Growl.GrowlHelperApp"
                 -- Make a list of all notification types that this script will ever send:
                 set the allNotificationsList to ¬
                 {"Password Notification"}
@@ -209,7 +209,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         if sender as integer ≤ my warningDays as integer then
             if (my isGrowlRunning and my growlEnabled) is true then
                 log "Sending Growl notification"
-                tell application "GrowlHelperApp" -- Send a notification
+                tell application id "com.Growl.GrowlHelperApp" -- Send a notification
                     notify with name "Password Notification" ¬
                     title "Password Expiration Warning" ¬
                     description "Your password will expire in " & sender & " days on " & expirationDate ¬
