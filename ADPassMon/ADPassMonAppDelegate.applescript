@@ -327,7 +327,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     -- Use ldapsearch to get search base
     on getSearchBase_(sender)
         try
-            set my mySearchBase to (do shell script "/usr/bin/ldapsearch -LLL -Q -s base -H ldap://" & myDNS & " rootDomainNamingContext | /usr/bin/awk '/rootDomainNamingContext/{print $2}'") as text
+            set my mySearchBase to (do shell script "/usr/bin/ldapsearch -LLL -Q -s base -H ldap://" & myDNS & " defaultNamingContext | /usr/bin/awk '/defaultNamingContext/{print $2}'") as text
             -- awk -F, '/rootDomainNamingContext/{print $(NF-1)","$NF}' to take only last two search base fields
             log "  mySearchBase: " & mySearchBase
         on error theError
