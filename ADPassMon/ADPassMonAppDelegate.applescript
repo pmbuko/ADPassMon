@@ -5,7 +5,7 @@
 --  Created by Peter Bukowinski on 3/24/11.
 
 --  This software is released under the terms of the MIT license.
---  Copyright (C) 2011 by Peter Bukowinski
+--  Copyright (C) 2012 by Peter Bukowinski
 --
 --  Permission is hereby granted, free of charge, to any person obtaining a copy
 --  of this software and associated documentation files (the "Software"), to deal
