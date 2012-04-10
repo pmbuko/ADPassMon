@@ -226,6 +226,10 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             addObserver_selector_name_object_(me, "doProcess:", "NSWorkspaceDidWakeNotification", missing value)
     end watchForWake_
     
+    on ticketViewer_(sender)
+        tell application "Ticket Viewer" to activate
+    end ticketViewer_
+    
     -- Checks for kerberos ticket, necessary for auto method. Also bound to Refresh Kerb menu item.
     on doKerbCheck_(sender)
         if skipKerb is false then
@@ -578,6 +582,14 @@ Please choose your configuration options."
 		menuItem's setTarget_(me)
 		menuItem's setAction_("doKerbCheck:")
 		menuItem's setEnabled_(not skipKerb)
+		statusMenu's addItem_(menuItem)
+		menuItem's release()
+        
+		set menuItem to (my NSMenuItem's alloc)'s init
+		menuItem's setTitle_("Launch Ticket Viewer")
+		menuItem's setTarget_(me)
+		menuItem's setAction_("ticketViewer:")
+		menuItem's setEnabled_(true)
 		statusMenu's addItem_(menuItem)
 		menuItem's release()
         
