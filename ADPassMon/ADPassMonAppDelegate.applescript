@@ -321,7 +321,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     on getDNS_(sender)
         try
             -- "first word of" added for 10.7 compatibility, which may return more than one item
-            set my myDNS to first word of (do shell script "/usr/sbin/scutil --dns | /usr/bin/awk '/nameserver\\[0\\]/{print $3}'") as text
+            set my myDNS to first word of (do shell script "/usr/sbin/scutil --dns | /usr/bin/awk '/nameserver\\[1\\]/{print $3}'") as text
             log "  myDNS: " & myDNS
         on error theError
             errorOut_(theError)
@@ -455,6 +455,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell application "System Preferences"
             try -- to use UI scripting
                 set current pane to pane id "com.apple.preferences.users"
+                activate
                 tell application "System Events"
                     tell application process "System Preferences"
                         if my osVersion is less than or equal to 6 then
@@ -470,7 +471,6 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             on error theError
                 errorOut_(theError, 1)
             end try
-            activate
         end tell
     end changePassword_
     
