@@ -62,6 +62,7 @@ script ADPassMonAppDelegate
     property prefsLocked : false
     property launchAtLogin : false
     property skipKerb : false
+    property hersheyScript : false
     
 --- Other Properties
     property isGrowlRunning : ""
@@ -80,6 +81,9 @@ script ADPassMonAppDelegate
     property daysUntilExp : ""
     property daysUntilExpNice : ""
     property expirationDate : ""
+    property myNotification : missing value
+    property ncTitle : "Password Expiration Warning"
+    property ncMessage : ""
 
 --- HANDLERS ---
     
@@ -172,53 +176,70 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     --        
     --    end  if
     --end loginCheck_
-    
+        
     -- Register with Growl and set up notification(s)
     on growlSetup_(sender)
-        log "Testing for Growl…"
-        tell application "System Events"
-            set my isGrowlRunning to (count of (every process whose bundle identifier is "com.Growl.GrowlHelperApp")) > 0
-        end tell
-        
-        if isGrowlRunning is true then
-            log "  Running"
-            tell application id "com.Growl.GrowlHelperApp"
-                -- Make a list of all notification types that this script will ever send:
-                set the allNotificationsList to ¬
-                {"Password Notification"}
-                
-                -- Make a list of the enabled notifications. Others can be enabled in Growl prefs.
-                set the enabledNotificationsList to ¬
-                {"Password Notification"}
-                
-                -- Register with Growl
-                register as application "ADPassMon" ¬
-                all notifications allNotificationsList ¬
-                default notifications enabledNotificationsList ¬
-                icon of application "ADPassMon"
+        if osVersion is less than 8 then
+            log "Testing for Growl…"
+            tell application "System Events"
+                set my isGrowlRunning to (count of (every process whose bundle identifier is "com.Growl.GrowlHelperApp")) > 0
             end tell
-        else -- if Growl is not running
-            log "  Not running"
-            set my growlEnabled to false
-            tell defaults to setObject_forKey_(growlEnabled, "growlEnabled")
+        
+            if isGrowlRunning is true then
+                log "  Running"
+                tell application id "com.Growl.GrowlHelperApp"
+                    -- Make a list of all notification types that this script will ever send:
+                    set the allNotificationsList to ¬
+                    {"Password Notification"}
+                
+                    -- Make a list of the enabled notifications. Others can be enabled in Growl prefs.
+                    set the enabledNotificationsList to ¬
+                    {"Password Notification"}
+                
+                    -- Register with Growl
+                    register as application "ADPassMon" ¬
+                    all notifications allNotificationsList ¬
+                    default notifications enabledNotificationsList ¬
+                    icon of application "ADPassMon"
+                end tell
+            else -- if Growl is not running
+                log "  Not running"
+                set my growlEnabled to false
+                tell defaults to setObject_forKey_(growlEnabled, "growlEnabled")
+            end if
+        else if osVersion is greater than or equal to 8 then -- allow notifications in OS 10.8
+            set my isGrowlRunning to true
+            set my growlEnabled to true
         end if
     end growlSetup_
     
     -- This handler is sent daysUntilExpNice and will trigger an alert if ≤ warningDays
     on growlNotify_(sender)
         if sender as integer ≤ my warningDays as integer then
-            if (my isGrowlRunning and my growlEnabled) is true then
-                log "Sending Growl notification"
-                tell application id "com.Growl.GrowlHelperApp" -- Send a notification
-                    notify with name "Password Notification" ¬
-                    title "Password Expiration Warning" ¬
-                    description "Your password will expire in " & sender & " days on " & expirationDate ¬
-                    application name "ADPassMon" ¬
-                    icon of application "ADPassMon.app"
-                end tell
+            if osVersion is less than 8 then
+                if (my isGrowlRunning and my growlEnabled) is true then
+                    log "Sending Growl notification"
+                    tell application id "com.Growl.GrowlHelperApp" -- Send a notification
+                        notify with name "Password Notification" ¬
+                        title "Password Expiration Warning" ¬
+                        description "Your password will expire in " & sender & " days on " & expirationDate ¬
+                        application name "ADPassMon" ¬
+                        icon of application "ADPassMon.app"
+                    end tell
+                end if
+            else if osVersion is greater than or equal to 8 then -- use the Notification Center for OS X 10.8 or greater
+                set ncMessage to "Your password will expire in " & sender & " days on " & expirationDate
+                sendNotificationWithTitleAndMessage_(ncTitle, ncMessage)
             end if
         end if
     end growlNotify_
+    
+    on sendNotificationWithTitleAndMessage_(aTitle, aMessage)
+        set myNotification to current application's NSUserNotification's alloc()'s init()
+        set myNotification's title to aTitle
+        set myNotification's informativeText to aMessage
+        current application's NSUserNotificationCenter's defaultUserNotificationCenter's deliverNotification_(myNotification)
+    end sendNotificationWithTitleAndMessage_
         
     -- Trigger doProcess handler on wake from sleep
     on watchForWake_(sender)
@@ -259,7 +280,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                             errorOut_(theError, 1)
                         end if
                     end try
-                else -- if osVersion is 7 or greater
+                else if osVersion is greater than or equal to 7 then -- if osVersion is 7 or greater
                     doLionKerb_(me)
                 end if
             else -- if selectedMethod = 1
@@ -450,28 +471,44 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         current application's NSApp's orderFrontStandardAboutPanel_(null)
     end about_
 
+    -- USED IN NEXT BLOCK --
+    on GetProcessCorrespondingToApplication(application_name)
+        tell application "System Events"
+            set application_id to (get the id of application application_name as string)
+            set process_name to name of (application processes where bundle identifier is application_id)
+        end tell
+        return process_name
+    end GetProcessCorrespondingToApplication
+    
     -- Bound to Change Password menu item
     on changePassword_(sender)
-        tell application "System Preferences"
-            try -- to use UI scripting
-                set current pane to pane id "com.apple.preferences.users"
-                activate
-                tell application "System Events"
-                    tell application process "System Preferences"
-                        if my osVersion is less than or equal to 6 then
-                            click radio button "Password" of tab group 1 of window "Accounts"
-                            click button "Change Password…" of tab group 1 of window "Accounts"
-                        end if
-                        if my osVersion is greater than 6 then
-                            click radio button "Password" of tab group 1 of window "Users & Groups"
-                            click button "Change Password…" of tab group 1 of window "Users & Groups"
-                        end if
+        -- Check for presence of Hershey Script
+        set hersheyScript to false -- we don't want this to fail in case script is removed after ADPassMon launches
+        tell application "Finder" to if exists "/Applications/Password Tools/Password_process.app" as POSIX file then set hersheyScript to true
+        if my hersheyScript is true then
+            run script "/Applications/Password Tools/Password_process.app/Contents/Resources/Scripts/main.scpt"
+        else
+            tell application "System Preferences"
+                try -- to use UI scripting
+                    set current pane to pane id "com.apple.preferences.users"
+                    activate
+                    tell application "System Events"
+                        tell application process "System Preferences"
+                            if my osVersion is less than or equal to 6 then
+                                click radio button "Password" of tab group 1 of window "Accounts"
+                                click button "Change Password…" of tab group 1 of window "Accounts"
+                            end if
+                            if my osVersion is greater than 6 then
+                                click radio button "Password" of tab group 1 of window "Users & Groups"
+                                click button "Change Password…" of tab group 1 of window "Users & Groups"
+                            end if
+                        end tell
                     end tell
-                end tell
-            on error theError
-                errorOut_(theError, 1)
-            end try
-        end tell
+                on error theError
+                    errorOut_(theError, 1)
+                end try
+            end tell
+        end if
     end changePassword_
     
     -- Bound to Prefs menu item
@@ -520,11 +557,11 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         if my growlEnabled is true then
             set my growlEnabled to false
             tell defaults to setObject_forKey_(growlEnabled, "growlEnabled")
-            statusMenu's itemWithTitle_("Use Growl Alerts")'s setState_(0)
+            statusMenu's itemWithTitle_("Enable Notifications")'s setState_(0)
         else
             set my growlEnabled to true
             tell defaults to setObject_forKey_(growlEnabled, "growlEnabled")
-            statusMenu's itemWithTitle_("Use Growl Alerts")'s setState_(1)
+            statusMenu's itemWithTitle_("Enable Notifications")'s setState_(1)
         end if
     end toggleGrowl_
     
@@ -559,7 +596,7 @@ Please choose your configuration options."
 		menuItem's release()
         
 		set menuItem to (my NSMenuItem's alloc)'s init
-        menuItem's setTitle_("Use Growl Alerts")
+        menuItem's setTitle_("Enable Notifications")
 		menuItem's setTarget_(me)
 		menuItem's setAction_("toggleGrowl:")
         menuItem's setEnabled_(isGrowlRunning)
