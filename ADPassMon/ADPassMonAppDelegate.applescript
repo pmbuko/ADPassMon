@@ -5,7 +5,7 @@
 --  Created by Peter Bukowinski on 3/24/11.
 
 --  This software is released under the terms of the MIT license.
---  Copyright (C) 2012 by Peter Bukowinski
+--  Copyright (C) 2013 by Peter Bukowinski
 --
 --  Permission is hereby granted, free of charge, to any person obtaining a copy
 --  of this software and associated documentation files (the "Software"), to deal
@@ -68,7 +68,7 @@ script ADPassMonAppDelegate
     property tooltip : "Waiting for data…"
     property osVersion : ""
     property kerb : ""
-    property myDNS : ""
+    property myLDAP : ""
     property mySearchBase : ""
     property expireAge : ""
     property expireAgeUnix : ""
@@ -90,7 +90,7 @@ script ADPassMonAppDelegate
         --set isIdle to false
     end errorOut_
     
-    -- Need to get the OS version so we can handle Kerberos differently in 10.7
+    -- Need to get the OS version so we can handle Kerberos differently in 10.7+
     on getOS_(sender)
         set my osVersion to (do shell script "sw_vers -productVersion | awk -F. '{print $2}'") as integer
         log "Running on OS 10." & osVersion & ".x"
@@ -151,6 +151,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                                             growlEnabled:growlEnabled, ¬
                                             warningDays:14, ¬
                                             prefsLocked:prefsLocked, ¬
+                                            myLDAP:myLDAP, ¬
                                             launchAtLogin:launchAtLogin})
     end regDefaults_
     
@@ -163,6 +164,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to set my growlEnabled to objectForKey_("growlEnabled")
         tell defaults to set my warningDays to objectForKey_("warningDays")
         tell defaults to set my prefsLocked to objectForKey_("prefsLocked")
+        tell defaults to set my myLDAP to objectForKey_("myLDAP")
         tell defaults to set my launchAtLogin to objectForKey_("launchAtLogin")
 	end retrieveDefaults_
     
@@ -319,21 +321,23 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     
     -- Use scutil to get AD DNS info
     on getDNS_(sender)
-        try
-            -- "first word of" added for 10.7 compatibility, which may return more than one item
-            set my myDNS to first word of (do shell script "/usr/sbin/scutil --dns | /usr/bin/awk '/nameserver\\[1\\]/{print $3}'") as text
-            log "  myDNS: " & myDNS
-        on error theError
-            errorOut_(theError)
-        end try
+        if myLDAP is "" then
+            try
+                -- "first word of" added for 10.7 compatibility, which may return more than one item
+                set my myLDAP to first word of (do shell script "/usr/sbin/scutil --dns | /usr/bin/awk '/nameserver\\[1\\]/{print $3}'") as text
+            on error theError
+                errorOut_(theError)
+            end try
+        end if
+        log "  myLDAP: " & myLDAP
     end getDNS_
     
     -- Use ldapsearch to get search base
     on getSearchBase_(sender)
         try
-            set my mySearchBase to (do shell script "/usr/bin/ldapsearch -LLL -Q -s base -H ldap://" & myDNS & " defaultNamingContext | /usr/bin/awk '/defaultNamingContext/{print $2}'") as text
-            -- awk -F, '/rootDomainNamingContext/{print $(NF-1)","$NF}' to take only last two search base fields
-            log "  mySearchBase: " & mySearchBase
+            set my mySearchBase to (do shell script "/usr/bin/ldapsearch -LLL -Q -s base -H ldap://" & myLDAP & " defaultNamingContext | /usr/bin/awk '/defaultNamingContext/{print $2}'") as text
+                -- awk -F, '/rootDomainNamingContext/{print $(NF-1)","$NF}' to take only last two search base fields
+                log "  mySearchBase: " & mySearchBase
         on error theError
             errorOut_(theError, 1)
         end try
@@ -342,7 +346,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     -- Use ldapsearch to get password expiration age
     on getExpireAge_(sender)
         try
-            set my expireAgeUnix to (do shell script "/usr/bin/ldapsearch -LLL -Q -s base -H ldap://" & myDNS & " -b " & mySearchBase & " maxPwdAge | /usr/bin/awk -F- '/maxPwdAge/{print $2/10000000}'") as integer
+            set my expireAgeUnix to (do shell script "/usr/bin/ldapsearch -LLL -Q -s base -H ldap://" & myLDAP & " -b " & mySearchBase & " maxPwdAge | /usr/bin/awk -F- '/maxPwdAge/{print $2/10000000}'") as integer
             set my expireAge to expireAgeUnix / 86400 as integer
             log "  Got expireAge: " & expireAge
             tell defaults to setObject_forKey_(expireAge, "expireAge")
@@ -353,7 +357,8 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     
     -- Determine when the password was last changed
     on getPwdSetDate_(sender)
-        set my pwdSetDateUnix to (((do shell script "/usr/bin/dscl localhost read /Search/Users/$USER pwdLastSet | /usr/bin/awk '/LastSet:/{print $2}'") as integer) / 10000000 - 1.16444736E+10)
+        --set my pwdSetDateUnix to (((do shell script "/usr/bin/dscl localhost read /Search/Users/$USER pwdLastSet | /usr/bin/awk '/LastSet:/{print $2}'") as integer) / 10000000 - 1.16444736E+10)
+        set my pwdSetDateUnix to (((do shell script "/opt/quest/bin/vastool -u sa-appleauth -w 5centsyAuth attrs $USER pwdLastSet | cut -d' ' -f2") as integer) / 10000000 - 1.16444736E+10)
         set my pwdSetDate to (pwdSetDateUnix / 86400) as real
         log "  The new pwdSetDate (" & pwdSetDate & ")"
         
@@ -538,6 +543,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to removeObjectForKey_("warningDays")
         tell defaults to removeObjectForKey_("growlEnabled")
         tell defaults to removeObjectForKey_("prefsLocked")
+        tell defaults to removeObjectForKey_("myLDAP")
         retrieveDefaults_(me)
         statusMenuController's updateDisplay()
         set my theMessage to "ADPassMon has been reset.
