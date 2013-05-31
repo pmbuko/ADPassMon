@@ -68,7 +68,7 @@ script ADPassMonAppDelegate
     property tooltip : "Waiting for data…"
     property osVersion : ""
     property kerb : ""
-    property myLDAP : "10.10.10.10"
+    property myLDAP : ""
     property mySearchBase : ""
     property expireAge : ""
     property expireAgeUnix : ""
@@ -80,6 +80,7 @@ script ADPassMonAppDelegate
     property daysUntilExp : ""
     property daysUntilExpNice : ""
     property expirationDate : ""
+    property pwPolicy : ""
 
 --- HANDLERS ---
     
@@ -152,6 +153,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                                             warningDays:14, ¬
                                             prefsLocked:prefsLocked, ¬
                                             myLDAP:myLDAP, ¬
+                                            pwPolicy:pwPolicy, ¬
                                             launchAtLogin:launchAtLogin})
     end regDefaults_
     
@@ -165,6 +167,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to set my warningDays to objectForKey_("warningDays")
         tell defaults to set my prefsLocked to objectForKey_("prefsLocked")
         tell defaults to set my myLDAP to objectForKey_("myLDAP")
+        tell defaults to set my pwPolicy to objectForKey_("pwPolicy")
         tell defaults to set my launchAtLogin to objectForKey_("launchAtLogin")
 	end retrieveDefaults_
     
@@ -457,6 +460,9 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
 
     -- Bound to Change Password menu item
     on changePassword_(sender)
+        tell application "System Events"
+            display dialog pwPolicy with icon 2 buttons {"OK"}
+        end tell
         tell application "System Preferences"
             try -- to use UI scripting
                 set current pane to pane id "com.apple.preferences.users"
@@ -544,6 +550,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to removeObjectForKey_("growlEnabled")
         tell defaults to removeObjectForKey_("prefsLocked")
         tell defaults to removeObjectForKey_("myLDAP")
+        tell defaults to removeObjectForKey_("pwPolicy")
         retrieveDefaults_(me)
         statusMenuController's updateDisplay()
         set my theMessage to "ADPassMon has been reset.
