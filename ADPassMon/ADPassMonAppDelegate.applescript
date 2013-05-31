@@ -68,7 +68,7 @@ script ADPassMonAppDelegate
     property tooltip : "Waiting for data…"
     property osVersion : ""
     property kerb : ""
-    property myLDAP : ""
+    property myLDAP : "10.10.10.10"
     property mySearchBase : ""
     property expireAge : ""
     property expireAgeUnix : ""
