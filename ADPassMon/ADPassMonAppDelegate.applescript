@@ -58,13 +58,14 @@ script ADPassMonAppDelegate
     property isIdle : true
     property isHidden : false
     property isManualEnabled : false
-    property growlEnabled : false
+    property allowNotifications : false
+    property enableNotifications : false
     property prefsLocked : false
     property launchAtLogin : false
     property skipKerb : false
     
 --- Other Properties
-    property isGrowlRunning : ""
+
     property tooltip : "Waiting for data…"
     property osVersion : ""
     property kerb : ""
@@ -99,15 +100,19 @@ script ADPassMonAppDelegate
     
     -- Tests if Universal Access scripting service is enabled
     on accTest_(sender)
-        log "Testing Universal Access settings…"
-        tell application "System Events"
-            set accStatus to get UI elements enabled
-        end tell
-        if accStatus is true then
-            log "  Already enabled"
-        else
-            log "  Disabled"
-            accEnable_(me)
+        if osVersion is less than 9 then
+            log "Testing Universal Access settings…"
+            tell application "System Events"
+                set accStatus to get UI elements enabled
+            end tell
+            if accStatus is true then
+                log "  Already enabled"
+            else
+                log "  Disabled"
+                accEnable_(me)
+            end if
+        else -- if we're running 10.9 or later, Accessibility is handled differently
+            set accStatus to true
         end if
     end accTest_
     
@@ -149,7 +154,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                                             isManualEnabled:isManualEnabled, ¬
                                             expireAge:0, ¬
                                             pwdSetDate:0, ¬
-                                            growlEnabled:growlEnabled, ¬
+                                            allowNotifications:allowNotifications, ¬
                                             warningDays:14, ¬
                                             prefsLocked:prefsLocked, ¬
                                             myLDAP:myLDAP, ¬
@@ -163,67 +168,43 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to set my isManualEnabled to objectForKey_("isManualEnabled") as integer
 		tell defaults to set my expireAge to objectForKey_("expireAge") as integer
 		tell defaults to set my pwdSetDate to objectForKey_("pwdSetDate") as integer
-        tell defaults to set my growlEnabled to objectForKey_("growlEnabled")
+        tell defaults to set my allowNotifications to objectForKey_("allowNotifications")
         tell defaults to set my warningDays to objectForKey_("warningDays")
         tell defaults to set my prefsLocked to objectForKey_("prefsLocked")
         tell defaults to set my myLDAP to objectForKey_("myLDAP")
         tell defaults to set my pwPolicy to objectForKey_("pwPolicy")
         tell defaults to set my launchAtLogin to objectForKey_("launchAtLogin")
 	end retrieveDefaults_
-    
-    -- Check if app should be added to login items via MCX
-    --on loginCheck_(sender)
-    --    if launchAtLogin is true then
-    --        
-    --    end  if
-    --end loginCheck_
-    
-    -- Register with Growl and set up notification(s)
-    on growlSetup_(sender)
-        log "Testing for Growl…"
-        tell application "System Events"
-            set my isGrowlRunning to (count of (every process whose bundle identifier is "com.Growl.GrowlHelperApp")) > 0
-        end tell
-        
-        if isGrowlRunning is true then
-            log "  Running"
-            tell application id "com.Growl.GrowlHelperApp"
-                -- Make a list of all notification types that this script will ever send:
-                set the allNotificationsList to ¬
-                {"Password Notification"}
-                
-                -- Make a list of the enabled notifications. Others can be enabled in Growl prefs.
-                set the enabledNotificationsList to ¬
-                {"Password Notification"}
-                
-                -- Register with Growl
-                register as application "ADPassMon" ¬
-                all notifications allNotificationsList ¬
-                default notifications enabledNotificationsList ¬
-                icon of application "ADPassMon"
-            end tell
-        else -- if Growl is not running
-            log "  Not running"
-            set my growlEnabled to false
-            tell defaults to setObject_forKey_(growlEnabled, "growlEnabled")
+
+    on notifySetup_(sender)
+        if osVersion is less than 8 then
+            set my allowNotifications to false
+            set my enableNotifications to false
+        else
+            set my allowNotifications to true
+            set my enableNotifications to true
         end if
-    end growlSetup_
+    end notifySetup_
     
     -- This handler is sent daysUntilExpNice and will trigger an alert if ≤ warningDays
-    on growlNotify_(sender)
+    on doNotify_(sender)
         if sender as integer ≤ my warningDays as integer then
-            if (my isGrowlRunning and my growlEnabled) is true then
-                log "Sending Growl notification"
-                tell application id "com.Growl.GrowlHelperApp" -- Send a notification
-                    notify with name "Password Notification" ¬
-                    title "Password Expiration Warning" ¬
-                    description "Your password will expire in " & sender & " days on " & expirationDate ¬
-                    application name "ADPassMon" ¬
-                    icon of application "ADPassMon.app"
-                end tell
+            if osVersion is greater than 7 then
+                if my enableNotifications is true then
+                    set ncTitle to "Password Expiration Warning"
+                    set ncMessage to "Your password will expire in " & sender & " days on " & expirationDate
+                    sendNotificationWithTitleAndMessage_(ncTitle, ncMessage)
+                end if
             end if
         end if
-    end growlNotify_
+    end doNotify_
+    
+    on sendNotificationWithTitleAndMessage_(aTitle, aMessage)
+        set myNotification to current application's NSUserNotification's alloc()'s init()
+        set myNotification's title to aTitle
+        set myNotification's informativeText to aMessage
+        current application's NSUserNotificationCenter's defaultUserNotificationCenter's deliverNotification_(myNotification)
+    end sendNotificationWithTitleAndMessage_
         
     -- Trigger doProcess handler on wake from sleep
     on watchForWake_(sender)
@@ -324,14 +305,12 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     
     -- Use scutil to get AD DNS info
     on getDNS_(sender)
-        if myLDAP is "" then
-            try
-                -- "first word of" added for 10.7 compatibility, which may return more than one item
-                set my myLDAP to first word of (do shell script "/usr/sbin/scutil --dns | /usr/bin/awk '/nameserver\\[1\\]/{print $3}'") as text
-            on error theError
-                errorOut_(theError)
-            end try
-        end if
+        try
+            -- "first word of" added for 10.7 compatibility, which may return more than one item
+            set my myLDAP to first word of (do shell script "/usr/sbin/scutil --dns | /usr/bin/awk '/nameserver\\[0\\]/{print $3}'") as text
+        on error theError
+            errorOut_(theError)
+        end try
         log "  myLDAP: " & myLDAP
     end getDNS_
     
@@ -360,8 +339,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     
     -- Determine when the password was last changed
     on getPwdSetDate_(sender)
-        --set my pwdSetDateUnix to (((do shell script "/usr/bin/dscl localhost read /Search/Users/$USER pwdLastSet | /usr/bin/awk '/LastSet:/{print $2}'") as integer) / 10000000 - 1.16444736E+10)
-        set my pwdSetDateUnix to (((do shell script "/opt/quest/bin/vastool -u sa-appleauth -w 5centsyAuth attrs $USER pwdLastSet | cut -d' ' -f2") as integer) / 10000000 - 1.16444736E+10)
+        set my pwdSetDateUnix to (((do shell script "/usr/bin/dscl localhost read /Search/Users/$USER pwdLastSet | /usr/bin/awk '/LastSet:/{print $2}'") as integer) / 10000000 - 1.16444736E+10)
         set my pwdSetDate to (pwdSetDateUnix / 86400) as real
         log "  The new pwdSetDate (" & pwdSetDate & ")"
         
@@ -444,7 +422,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             set my isIdle to true
             
 			log "Finished process"
-            growlNotify_(daysUntilExpNice)
+            doNotify_(daysUntilExpNice)
         on error theError
             errorOut_(theError, 1)
 		end try
@@ -526,18 +504,18 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to setObject_forKey_(warningDays, "warningDays")
     end setWarningDays_
 
-    -- Bound to Growl items in menu and Prefs window
-    on toggleGrowl_(sender)
-        if my growlEnabled is true then
-            set my growlEnabled to false
-            tell defaults to setObject_forKey_(growlEnabled, "growlEnabled")
-            statusMenu's itemWithTitle_("Use Growl Alerts")'s setState_(0)
+    -- Bound to Notify items in menu and Prefs window
+    on toggleNotify_(sender)
+        if my enableNotifications is true then
+            set my enableNotifications to false
+            tell defaults to setObject_forKey_(enableNotifications, "enableNotifications")
+            statusMenu's itemWithTitle_("Use Notifications")'s setState_(0)
         else
-            set my growlEnabled to true
-            tell defaults to setObject_forKey_(growlEnabled, "growlEnabled")
-            statusMenu's itemWithTitle_("Use Growl Alerts")'s setState_(1)
+            set my enableNotifications to true
+            tell defaults to setObject_forKey_(enableNotifications, "enableNotifications")
+            statusMenu's itemWithTitle_("Use Notifications")'s setState_(1)
         end if
-    end toggleGrowl_
+    end toggleNotify_
     
     -- Bound to Revert button in Prefs window (REMOVE ON RELEASE)
     on revertDefaults_(sender)
@@ -547,7 +525,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to removeObjectForKey_("expireAge")
         tell defaults to removeObjectForKey_("pwdSetDate")
         tell defaults to removeObjectForKey_("warningDays")
-        tell defaults to removeObjectForKey_("growlEnabled")
+        tell defaults to removeObjectForKey_("allowNotifications")
         tell defaults to removeObjectForKey_("prefsLocked")
         tell defaults to removeObjectForKey_("myLDAP")
         tell defaults to removeObjectForKey_("pwPolicy")
@@ -572,11 +550,11 @@ Please choose your configuration options."
 		menuItem's release()
         
 		set menuItem to (my NSMenuItem's alloc)'s init
-        menuItem's setTitle_("Use Growl Alerts")
+        menuItem's setTitle_("Use Notifications")
 		menuItem's setTarget_(me)
-		menuItem's setAction_("toggleGrowl:")
-        menuItem's setEnabled_(isGrowlRunning)
-        menuItem's setState_(growlEnabled)
+		menuItem's setAction_("toggleNotify:")
+        menuItem's setEnabled_(allowNotifications)
+        menuItem's setState_(enableNotifications)
         statusMenu's addItem_(menuItem)
 		menuItem's release()
         
@@ -642,8 +620,8 @@ Please choose your configuration options."
 	on applicationWillFinishLaunching_(aNotification)
         getOS_(me)
         accTest_(me)
-        regDefaults_(me) -- populate plist file with defaults (will not overwrite non-default settings)
-        growlSetup_(me)
+        notifySetup_(me)
+        regDefaults_(me) -- populate plist file with defaults (will not overwrite non-default settings))
         retrieveDefaults_(me)
         createMenu_(me)
         
@@ -669,7 +647,7 @@ Please choose your configuration options."
         
         watchForWake_(me)
         
-        -- Set a timer to trigger doProcess handler every 12 hrs and spawn Growl notifications (if enabled).
+        -- Set a timer to trigger doProcess handler every 12 hrs and spawn notifications (if enabled).
         NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(43200, me, "doProcess:", missing value, true)
     end applicationWillFinishLaunching_
     
