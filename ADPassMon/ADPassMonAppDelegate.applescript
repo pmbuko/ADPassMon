@@ -63,6 +63,7 @@ script ADPassMonAppDelegate
     property prefsLocked : false
     property launchAtLogin : false
     property skipKerb : false
+    property accessDialog: true
     
 --- Other Properties
 
@@ -113,6 +114,24 @@ script ADPassMonAppDelegate
             end if
         else -- if we're running 10.9 or later, Accessibility is handled differently
             set accStatus to true
+            tell application "System Preferences"
+                activate
+                set current pane to pane id "com.apple.preference.security"
+            end tell
+            if accessDialog is true then
+                set my accessDialog to (display dialog "ADPassMon's \"Change Password\" feature requires special access to open the system panel for you. If you want to use this feature, please follow these instructions and then click 'Done', otherwise click 'No Thanks':
+            
+1. Click the Privacy tab in the Security & Settings window.
+2. Click the lock icon and enter your password to continue.
+3. Find and enable ADPassMon in the list" buttons {"Ask me later","No Thanks","Done"} default button 2 with icon 2)
+                if button returned of accessDialog is "No Thanks"
+                    set accessDialog to false
+                else if button returned of accessDialog is "Done"
+                    set accessDialog to false
+                else
+                    set accessDialog to true
+                end if
+            end if
         end if
     end accTest_
     
@@ -159,6 +178,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                                             prefsLocked:prefsLocked, ¬
                                             myLDAP:myLDAP, ¬
                                             pwPolicy:pwPolicy, ¬
+                                            accessDialog:accessDialog, ¬
                                             launchAtLogin:launchAtLogin})
     end regDefaults_
     
@@ -173,6 +193,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to set my prefsLocked to objectForKey_("prefsLocked")
         tell defaults to set my myLDAP to objectForKey_("myLDAP")
         tell defaults to set my pwPolicy to objectForKey_("pwPolicy")
+        tell defaults to set my accessDialog to objectForKey_("accessDialog")
         tell defaults to set my launchAtLogin to objectForKey_("launchAtLogin")
 	end retrieveDefaults_
 
@@ -529,6 +550,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to removeObjectForKey_("prefsLocked")
         tell defaults to removeObjectForKey_("myLDAP")
         tell defaults to removeObjectForKey_("pwPolicy")
+        tell defaults to removeObjectForKey_("accessDialog")
         retrieveDefaults_(me)
         statusMenuController's updateDisplay()
         set my theMessage to "ADPassMon has been reset.
