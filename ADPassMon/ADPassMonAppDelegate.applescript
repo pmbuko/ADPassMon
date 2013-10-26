@@ -53,20 +53,22 @@ script ADPassMonAppDelegate
     property selectedMethod : missing value
     property warningDays : missing value
     property thePassword : missing value
+    property toggleNotifyButton : missing value
 
 --- Booleans
     property isIdle : true
     property isHidden : false
     property isManualEnabled : false
-    property allowNotifications : false
     property enableNotifications : false
     property prefsLocked : false
     property launchAtLogin : false
     property skipKerb : false
-    property accessDialog: true
+    property showChangePass : false
+    property pwPolicy : false
     
 --- Other Properties
 
+    property mavAccTest : 1
     property tooltip : "Waiting for data…"
     property osVersion : ""
     property kerb : ""
@@ -82,7 +84,7 @@ script ADPassMonAppDelegate
     property daysUntilExp : ""
     property daysUntilExpNice : ""
     property expirationDate : ""
-    property pwPolicy : ""
+    property mavAccStatus : ""
 
 --- HANDLERS ---
     
@@ -101,46 +103,53 @@ script ADPassMonAppDelegate
     
     -- Tests if Universal Access scripting service is enabled
     on accTest_(sender)
+        log "Testing Universal Access settings…"
         if osVersion is less than 9 then
-            log "Testing Universal Access settings…"
             tell application "System Events"
                 set accStatus to get UI elements enabled
             end tell
             if accStatus is true then
-                log "  Already enabled"
+                log "  Enabled"
             else
                 log "  Disabled"
                 accEnable_(me)
             end if
         else -- if we're running 10.9 or later, Accessibility is handled differently
-            set accStatus to true
-            tell application "System Preferences"
-                activate
-                set current pane to pane id "com.apple.preference.security"
-            end tell
-            if accessDialog is true then
-                set my accessDialog to (display dialog "ADPassMon's \"Change Password\" feature requires special access to open the system panel for you. If you want to use this feature, please follow these instructions and then click 'Done', otherwise click 'No Thanks':
-            
-1. Click the Privacy tab in the Security & Settings window.
-2. Click the lock icon and enter your password to continue.
-3. Find and enable ADPassMon in the list" buttons {"Ask me later","No Thanks","Done"} default button 2 with icon 2)
-                if button returned of accessDialog is "No Thanks"
-                    set accessDialog to false
-                else if button returned of accessDialog is "Done"
-                    set accessDialog to false
-                else
-                    set accessDialog to true
+            tell defaults to set my mavAccTest to objectForKey_("mavAccTest")
+            if mavAccTest is 1 then
+                if "80" is in (do shell script "/usr/bin/id -G") then -- checks if user is in admin group
+                    set accessDialog to (display dialog "ADPassMon's \"Change Password\" feature requires assistive access to open the password panel.
+                    
+Enable it now? (requires password)" with icon 2 buttons {"No", "Yes"} default button 2)
+                    if button returned of accessDialog is "Yes" then
+                        log "  Prompting for password"
+                        try
+                            set mavAccStatus to (do shell script "sqlite3 '/Library/Application Support/com.apple.TCC/TCC.db' \"SELECT * FROM access WHERE client='org.pmbuko.ADPassMon';\"" with administrator privileges)
+                        end try
+                        if mavAccStatus is "" then
+                            log "  Not enabled"
+                            try
+                                do shell script "sqlite3 '/Library/Application Support/com.apple.TCC/TCC.db' \"INSERT INTO access VALUES('kTCCServiceAccessibility','org.pmbuko.ADPassMon',0,1,1,NULL);\"" with administrator privileges
+                                set my mavAccTest to 0
+                                tell defaults to setObject_forKey_(0, "mavAccTest")
+                            on error theError
+                                log "Unable to set access. Error: " & theError
+                            end try
+                        else
+                            log "  Enabled"
+                        end if
+                    end if
                 end if
             end if
         end if
     end accTest_
-    
+
     -- Prompts to enable Universal Access scripting service
     on accEnable_(sender)
         if "80" is in (do shell script "/usr/bin/id -G") then -- checks if user is in admin group
             activate
-            set response to (display dialog "For best performance, ADPassMon requires that 'access for assistive devices' be enabled.
-        
+            set response to (display dialog "ADPassMon's \"Change Password\" feature requires assistive access to open the password panel.
+            
 Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             if button returned of response is "Yes" then
                 log "  Prompting for password"
@@ -173,12 +182,11 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                                             isManualEnabled:isManualEnabled, ¬
                                             expireAge:0, ¬
                                             pwdSetDate:0, ¬
-                                            allowNotifications:allowNotifications, ¬
                                             warningDays:14, ¬
                                             prefsLocked:prefsLocked, ¬
                                             myLDAP:myLDAP, ¬
                                             pwPolicy:pwPolicy, ¬
-                                            accessDialog:accessDialog, ¬
+                                            mavAccTest:mavAccTest, ¬
                                             launchAtLogin:launchAtLogin})
     end regDefaults_
     
@@ -188,21 +196,18 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to set my isManualEnabled to objectForKey_("isManualEnabled") as integer
 		tell defaults to set my expireAge to objectForKey_("expireAge") as integer
 		tell defaults to set my pwdSetDate to objectForKey_("pwdSetDate") as integer
-        tell defaults to set my allowNotifications to objectForKey_("allowNotifications")
         tell defaults to set my warningDays to objectForKey_("warningDays")
         tell defaults to set my prefsLocked to objectForKey_("prefsLocked")
         tell defaults to set my myLDAP to objectForKey_("myLDAP")
         tell defaults to set my pwPolicy to objectForKey_("pwPolicy")
-        tell defaults to set my accessDialog to objectForKey_("accessDialog")
+        tell defaults to set my mavAccTest to objectForKey_("mavAccTest")
         tell defaults to set my launchAtLogin to objectForKey_("launchAtLogin")
 	end retrieveDefaults_
 
     on notifySetup_(sender)
         if osVersion is less than 8 then
-            set my allowNotifications to false
             set my enableNotifications to false
         else
-            set my allowNotifications to true
             set my enableNotifications to true
         end if
     end notifySetup_
@@ -459,9 +464,11 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
 
     -- Bound to Change Password menu item
     on changePassword_(sender)
-        tell application "System Events"
-            display dialog pwPolicy with icon 2 buttons {"OK"}
-        end tell
+        if pwPolicy then
+            tell application "System Events"
+                display dialog pwPolicy with icon 2 buttons {"OK"}
+            end tell
+        end if
         tell application "System Preferences"
             try -- to use UI scripting
                 set current pane to pane id "com.apple.preferences.users"
@@ -530,11 +537,11 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         if my enableNotifications is true then
             set my enableNotifications to false
             tell defaults to setObject_forKey_(enableNotifications, "enableNotifications")
-            statusMenu's itemWithTitle_("Use Notifications")'s setState_(0)
+            my statusMenu's itemWithTitle_("Use Notifications")'s setState_(0)
         else
             set my enableNotifications to true
             tell defaults to setObject_forKey_(enableNotifications, "enableNotifications")
-            statusMenu's itemWithTitle_("Use Notifications")'s setState_(1)
+            my statusMenu's itemWithTitle_("Use Notifications")'s setState_(1)
         end if
     end toggleNotify_
     
@@ -546,11 +553,10 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to removeObjectForKey_("expireAge")
         tell defaults to removeObjectForKey_("pwdSetDate")
         tell defaults to removeObjectForKey_("warningDays")
-        tell defaults to removeObjectForKey_("allowNotifications")
         tell defaults to removeObjectForKey_("prefsLocked")
         tell defaults to removeObjectForKey_("myLDAP")
         tell defaults to removeObjectForKey_("pwPolicy")
-        tell defaults to removeObjectForKey_("accessDialog")
+        tell defaults to removeObjectForKey_("mavAccTest")
         retrieveDefaults_(me)
         statusMenuController's updateDisplay()
         set my theMessage to "ADPassMon has been reset.
@@ -575,7 +581,7 @@ Please choose your configuration options."
         menuItem's setTitle_("Use Notifications")
 		menuItem's setTarget_(me)
 		menuItem's setAction_("toggleNotify:")
-        menuItem's setEnabled_(allowNotifications)
+        menuItem's setEnabled_(true)
         menuItem's setState_(enableNotifications)
         statusMenu's addItem_(menuItem)
 		menuItem's release()
@@ -641,9 +647,9 @@ Please choose your configuration options."
     -- Do processes necessary for app initiation
 	on applicationWillFinishLaunching_(aNotification)
         getOS_(me)
+        regDefaults_(me) -- populate plist file with defaults (will not overwrite non-default settings))
         accTest_(me)
         notifySetup_(me)
-        regDefaults_(me) -- populate plist file with defaults (will not overwrite non-default settings))
         retrieveDefaults_(me)
         createMenu_(me)
         

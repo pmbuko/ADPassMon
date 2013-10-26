@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4457.6" systemVersion="13A476u" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13A603" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment defaultVersion="1060" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4457.6"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -12,7 +12,7 @@
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application"/>
-        <window title="ADPassMon Preferences" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="371">
+        <window title="ADPassMon Preferences" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="371">
             <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES"/>
             <rect key="contentRect" x="862" y="600" width="369" height="331"/>
@@ -68,6 +68,7 @@
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" metaFont="system"/>
                                                         <connections>
+                                                            <action selector="useManualMethod:" target="494" id="975"/>
                                                             <binding destination="494" name="value" keyPath="isManualEnabled" id="962">
                                                                 <dictionary key="options">
                                                                     <string key="NSValueTransformerName">NSNegateBoolean</string>
@@ -81,6 +82,7 @@
                                                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                         <font key="font" metaFont="system"/>
                                                         <connections>
+                                                            <action selector="selectText:" target="941" id="960"/>
                                                             <binding destination="494" name="value" keyPath="isManualEnabled" id="968"/>
                                                         </connections>
                                                     </buttonCell>
@@ -96,8 +98,8 @@
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                             <connections>
-                                                <binding destination="494" name="hidden" keyPath="isManualEnabled" id="966"/>
                                                 <binding destination="494" name="value" keyPath="expireAge" id="967"/>
+                                                <binding destination="494" name="hidden" keyPath="isManualEnabled" id="966"/>
                                             </connections>
                                         </textField>
                                         <textField toolTip="Enter maximum password age, in days" verticalHuggingPriority="750" id="941">
@@ -119,7 +121,7 @@
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                             <connections>
-                                                <action selector="selectText:" destination="956" id="960"/>
+                                                <action selector="useManualMethod:" target="494" id="976"/>
                                                 <binding destination="494" name="enabled" keyPath="isManualEnabled" id="971"/>
                                                 <binding destination="494" name="value" keyPath="manualExpireDays" id="963"/>
                                             </connections>
@@ -128,7 +130,7 @@
                                             <rect key="frame" x="15" y="45" width="146" height="26"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="check" title="Add to Login Items" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="952">
-                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <behavior key="behavior" pushIn="YES" changeContents="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
                                             <connections>
@@ -139,14 +141,16 @@
                                             <rect key="frame" x="15" y="134" width="128" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="check" title="Use Notifications" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="951">
-                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <behavior key="behavior" pushIn="YES" changeContents="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
                                             <connections>
-                                                <binding destination="494" name="enabled" keyPath="allowNotifications" id="zdU-Xh-YXU"/>
-                                                <binding destination="494" name="value" keyPath="enableNotifications" id="wAd-kM-9xY">
+                                                <action selector="toggleNotify:" target="494" id="tVE-lK-mnz"/>
+                                                <binding destination="676" name="value" keyPath="values.enableNotifications" id="EYM-Xg-uNU">
                                                     <dictionary key="options">
-                                                        <bool key="NSValidatesImmediately" value="YES"/>
+                                                        <bool key="NSRaisesForNotApplicableKeys" value="NO"/>
+                                                        <bool key="NSConditionallySetsEnabled" value="NO"/>
+                                                        <bool key="NSAllowsEditingMultipleValuesSelection" value="NO"/>
                                                     </dictionary>
                                                 </binding>
                                             </connections>
@@ -179,7 +183,8 @@
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                             <connections>
-                                                <binding destination="494" name="enabled" keyPath="allowNotifications" id="PVL-Th-fgF"/>
+                                                <action selector="setWarningDays:" target="494" id="972"/>
+                                                <binding destination="494" name="enabled" keyPath="enableNotifications" id="VDp-YF-6bn"/>
                                                 <binding destination="494" name="value" keyPath="warningDays" id="965"/>
                                             </connections>
                                         </textField>
@@ -190,6 +195,9 @@
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
+                                            <connections>
+                                                <action selector="doKerbCheck:" target="494" id="974"/>
+                                            </connections>
                                         </button>
                                     </subviews>
                                 </view>
@@ -197,7 +205,7 @@
                             <tabViewItem label="Reset" identifier="2" id="935">
                                 <view key="view" id="936">
                                     <rect key="frame" x="10" y="33" width="323" height="210"/>
-                                    <autoresizingMask key="autoresizingMask"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <button verticalHuggingPriority="750" id="600">
                                             <rect key="frame" x="98" y="99" width="127" height="25"/>
@@ -206,6 +214,9 @@
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
+                                            <connections>
+                                                <action selector="revertDefaults:" target="494" id="605"/>
+                                            </connections>
                                         </button>
                                         <textField verticalHuggingPriority="750" id="977">
                                             <rect key="frame" x="14" y="139" width="295" height="68"/>
@@ -227,68 +238,12 @@
         </window>
         <customObject id="494" customClass="ADPassMonAppDelegate">
             <connections>
-                <action selector="doKerbCheck:" destination="946" id="974"/>
-                <action selector="revertDefaults:" destination="600" id="605"/>
-                <action selector="setWarningDays:" destination="945" id="972"/>
-                <action selector="toggleNotify:" destination="943" id="ugY-bw-6Z2"/>
-                <action selector="useManualMethod:" destination="957" id="975"/>
-                <action selector="useManualMethod:" destination="941" id="976"/>
                 <outlet property="theWindow" destination="371" id="929"/>
             </connections>
         </customObject>
         <customObject id="420" customClass="NSFontManager"/>
         <userDefaultsController id="676"/>
         <customObject id="706" userLabel="Launch At Login Controller" customClass="LaunchAtLoginController"/>
+        <userDefaultsController representsSharedInstance="YES" id="jdT-b8-uVY"/>
     </objects>
-    <classes>
-        <class className="ADPassMonAppDelegate" superclassName="NSObject">
-            <source key="sourceIdentifier" type="project" relativePath="./Classes/ADPassMonAppDelegate.h"/>
-            <relationships>
-                <relationship kind="action" name="about:"/>
-                <relationship kind="action" name="accEnable:"/>
-                <relationship kind="action" name="accTest:"/>
-                <relationship kind="action" name="applicationShouldTerminate:"/>
-                <relationship kind="action" name="applicationWillFinishLaunching:"/>
-                <relationship kind="action" name="applicationWillTerminate:"/>
-                <relationship kind="action" name="changePassword:"/>
-                <relationship kind="action" name="compareDates:"/>
-                <relationship kind="action" name="createMenu:"/>
-                <relationship kind="action" name="doKerbCheck:"/>
-                <relationship kind="action" name="doLionKerb:"/>
-                <relationship kind="action" name="doNotify:"/>
-                <relationship kind="action" name="doProcess:"/>
-                <relationship kind="action" name="getDNS:"/>
-                <relationship kind="action" name="getExpirationDate:"/>
-                <relationship kind="action" name="getExpireAge:"/>
-                <relationship kind="action" name="getOS:"/>
-                <relationship kind="action" name="getPwdSetDate:"/>
-                <relationship kind="action" name="getSearchBase:"/>
-                <relationship kind="action" name="notifySetup:"/>
-                <relationship kind="action" name="quit:"/>
-                <relationship kind="action" name="regDefaults:"/>
-                <relationship kind="action" name="renewLionKerb:"/>
-                <relationship kind="action" name="retrieveDefaults:"/>
-                <relationship kind="action" name="revertDefaults:"/>
-                <relationship kind="action" name="setWarningDays:"/>
-                <relationship kind="action" name="showMainWindow:"/>
-                <relationship kind="action" name="ticketViewer:"/>
-                <relationship kind="action" name="toggleNotify:"/>
-                <relationship kind="action" name="useManualMethod:"/>
-                <relationship kind="action" name="watchForWake:"/>
-                <relationship kind="outlet" name="defaults"/>
-                <relationship kind="outlet" name="manualExpireDays"/>
-                <relationship kind="outlet" name="selectedMethod"/>
-                <relationship kind="outlet" name="standardUserDefaults"/>
-                <relationship kind="outlet" name="statusMenu"/>
-                <relationship kind="outlet" name="statusMenuController"/>
-                <relationship kind="outlet" name="theMessage"/>
-                <relationship kind="outlet" name="thePassword"/>
-                <relationship kind="outlet" name="theWindow"/>
-                <relationship kind="outlet" name="warningDays"/>
-            </relationships>
-        </class>
-        <class className="LaunchAtLoginController" superclassName="NSObject">
-            <source key="sourceIdentifier" type="project" relativePath="./Classes/LaunchAtLoginController.h"/>
-        </class>
-    </classes>
 </document>

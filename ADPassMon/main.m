@@ -3,7 +3,7 @@
 //  ADPassMon
 //
 //  Created by Peter Bukowinski on 3/24/11.
-//  Copyright 2012 Peter Bukowinski. All rights reserved.
+//  Copyright 2013 Peter Bukowinski. All rights reserved.
 //
 
 #import <Cocoa/Cocoa.h>
