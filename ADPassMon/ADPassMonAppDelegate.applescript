@@ -64,7 +64,6 @@ script ADPassMonAppDelegate
     property launchAtLogin : false
     property skipKerb : false
     property showChangePass : false
-    property pwPolicy : false
     
 --- Other Properties
 
@@ -79,6 +78,7 @@ script ADPassMonAppDelegate
     property pwdSetDate : ""
     property pwdSetDateUnix : ""
     property plistPwdSetDate : ""
+    property pwPolicy : ""
     property today : ""
     property todayUnix : ""
     property daysUntilExp : ""
@@ -464,7 +464,8 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
 
     -- Bound to Change Password menu item
     on changePassword_(sender)
-        if pwPolicy then
+        tell defaults to set my pwPolicy to objectForKey_("pwPolicy")
+        if my pwPolicy is not "" then
             tell application "System Events"
                 display dialog pwPolicy with icon 2 buttons {"OK"}
             end tell
