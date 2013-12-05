@@ -464,7 +464,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
 
     -- Bound to Change Password menu item
     on changePassword_(sender)
-        tell defaults to set my pwPolicy to objectForKey_("pwPolicy")
+        tell defaults to set my pwPolicy to objectForKey_("pwPolicy") as string
         if my pwPolicy is not "" then
             tell application "System Events"
                 display dialog pwPolicy with icon 2 buttons {"OK"}
