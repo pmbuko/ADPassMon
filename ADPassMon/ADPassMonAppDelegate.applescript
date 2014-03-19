@@ -5,7 +5,7 @@
 --  Created by Peter Bukowinski on 3/24/11.
 
 --  This software is released under the terms of the MIT license.
---  Copyright (C) 2013 by Peter Bukowinski
+--  Copyright (C) 2014 by Peter Bukowinski
 --
 --  Permission is hereby granted, free of charge, to any person obtaining a copy
 --  of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@
 --  THE SOFTWARE.
 --
 -- TO DO:
--- - possibly revise getSearchBase handler (#294) to only use the last two "DC=" pieces. Comment in handler
+-- - possibly revise getSearchBase handler (#344) to only use the last two "DC=" pieces. Comment in handler
 --
 -- FEATURE REQUESTS:
 -- - enable mcx defaults hook for adding as login item.
@@ -261,7 +261,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                         --updateMenuTitle_("[ ! ]", "Kerberos ticket expired or not found")
                         -- offer to renew Kerberos ticket
                         activate
-                        set response to (display dialog "No Kerberos ticket was found. Do you want to renew it?" with icon 1 buttons {"No","Yes"} default button "Yes")
+                        set response to (display dialog "No Kerberos ticket for Active Directory was found. Do you want to renew it?" with icon 1 buttons {"No","Yes"} default button "Yes")
                         if button returned of response is "Yes" then
                             do shell script "/bin/echo '' | /usr/bin/kinit -l 24h -r 24h &" -- Displays a password dialog in 10.6 (and maybe 10.5?)
                             log "  Ticket acquired"
@@ -298,7 +298,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             --updateMenuTitle_("[ ! ]", "Kerberos ticket expired or not found")
             -- offer to renew Kerberos ticket
             activate
-            set response to (display dialog "No Kerberos ticket was found. Do you want to renew it?" with icon 2 buttons {"No","Yes"} default button "Yes")
+            set response to (display dialog "No Kerberos ticket for Active Directory was found. Do you want to renew it?" with icon 2 buttons {"No","Yes"} default button "Yes")
             if button returned of response is "Yes" then
 				renewLionKerb_(me)
             else -- if No is clicked
@@ -311,7 +311,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
 	-- Runs when Yes of Lion kerberos renewal dialog (from above) is clicked.
 	on renewLionKerb_(sender)
 		try
-			set thePassword to text returned of (display dialog "Enter your password:" default answer "" with hidden answer)
+			set thePassword to text returned of (display dialog "Enter your Active Directory password:" default answer "" with hidden answer)
 			do shell script "/bin/echo '" & thePassword & "' | /usr/bin/kinit -l 10h -r 10h --password-file=STDIN"
             log "  Ticket acquired"
 			display dialog "Kerberos ticket acquired." with icon 1 buttons {"OK"} default button 1
