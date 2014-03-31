@@ -27,6 +27,7 @@
 --
 -- TO DO:
 -- - possibly revise getSearchBase handler (#344) to only use the last two "DC=" pieces. Comment in handler
+-- - Disable "Change Password" menu item when off domain network
 --
 -- FEATURE REQUESTS:
 -- - enable mcx defaults hook for adding as login item.
@@ -379,12 +380,14 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             -- If we can get a valid pwdSetDate, then we're on the network, so enable kerb features
             set my skipKerb to false
             statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(not skipKerb)
+            statusMenu's itemWithTitle_("Change Password…")'s setEnabled_(not skipKerb)
         else if plistPwdSetDate is greater than pwdSetDate then
             log "    is < value in plist (" & plistPwdSetDate & ") so we ignore it"
             set my pwdSetDate to plistPwdSetDate
              -- If we can't get a valid pwdSetDate, then we're off the network, so disable kerb features
             set my skipKerb to true
             statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(not skipKerb)
+            statusMenu's itemWithTitle_("Change Password…")'s setEnabled_(not skipKerb)
         end if
     end getPwdSetDate_
     
@@ -625,7 +628,7 @@ Please choose your configuration options."
 		menuItem's setTitle_("Change Password…")
 		menuItem's setTarget_(me)
 		menuItem's setAction_("changePassword:")
-		menuItem's setEnabled_(true)
+		menuItem's setEnabled_(not skipKerb)
 		statusMenu's addItem_(menuItem)
 		menuItem's release()
         
