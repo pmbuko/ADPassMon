@@ -366,7 +366,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     
     -- Determine when the password was last changed
     on getPwdSetDate_(sender)
-        set my pwdSetDateUnix to (((do shell script "/usr/bin/dscl localhost read /Search/Users/$USER pwdLastSet | /usr/bin/awk '/LastSet:/{print $2}'") as integer) / 10000000 - 1.16444736E+10)
+        set my pwdSetDateUnix to last word of (((do shell script "/usr/bin/dscl localhost read /Search/Users/$USER pwdLastSet | /usr/bin/awk '/LastSet:/{print $2}'") as integer) / 10000000 - 1.16444736E+10)
         set my pwdSetDate to (pwdSetDateUnix / 86400) as real
         log "  The new pwdSetDate (" & pwdSetDate & ")"
         
