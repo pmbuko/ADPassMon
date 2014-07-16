@@ -366,13 +366,20 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     
     -- Determine when the password was last changed
     on getPwdSetDate_(sender)
+        -- number formatter for truncated decimal places
+        set fmt to current application's NSNumberFormatter's alloc()'s init()
+        fmt's setUsesSignificantDigits_(true)
+        fmt's setMaximumSignificantDigits_(7)
+        fmt's setMinimumSignificantDigits_(1)
+        
         set my pwdSetDateUnix to (do shell script "/usr/bin/dscl localhost read /Search/Users/$USER pwdLastSet | /usr/bin/awk '/LastSet:/{print $2}'")
         if (count words of pwdSetDateUnix) is greater than 1 then
             set my pwdSetDateUnix to last word of pwdSetDateUnix
         end if
         set my pwdSetDateUnix to ((pwdSetDateUnix as integer) / 10000000 - 1.16444736E+10)
-        set my pwdSetDate to (pwdSetDateUnix / 86400) as real
+        set my pwdSetDate to fmt's stringFromNumber_(pwdSetDateUnix / 86400)
         log "  The new pwdSetDate (" & pwdSetDate & ")"
+        
         
         -- Now we compare the plist's value for pwdSetDate to the one we just calculated so
         -- we avoid using an old or bad value (i.e. when pwdLastSet can't be found by dscl)
@@ -397,10 +404,15 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     
     -- Calculate the number of days until password expiration
     on compareDates_(sender)
+        -- number formatter for truncated decimal places
+        set fmt to current application's NSNumberFormatter's alloc()'s init()
+        fmt's setUsesSignificantDigits_(true)
+        fmt's setMaximumSignificantDigits_(7)
+        fmt's setMinimumSignificantDigits_(1)
         try
             set todayUnix to (do shell script "/bin/date +%s") as integer
             set today to (todayUnix / 86400)
-            set my daysUntilExp to (expireAge - (today - pwdSetDate)) -- removed 'as integer' to avoid rounding issue
+            set my daysUntilExp to fmt's stringFromNumber_(expireAge - (today - pwdSetDate)) as real -- removed 'as integer' to avoid rounding issue
             log "  daysUntilExp: " & daysUntilExp
             set my daysUntilExpNice to round daysUntilExp rounding toward zero
             log "  daysUntilExpNice: " & daysUntilExpNice
