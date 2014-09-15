@@ -371,6 +371,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         fmt's setUsesSignificantDigits_(true)
         fmt's setMaximumSignificantDigits_(7)
         fmt's setMinimumSignificantDigits_(1)
+        fmt's setDecimalSeparator_(".")
         
         set my pwdSetDateUnix to (do shell script "/usr/bin/dscl localhost read /Search/Users/$USER SMBPasswordLastSet | /usr/bin/awk '/LastSet:/{print $2}'")
         if (count words of pwdSetDateUnix) is greater than 1 then
@@ -382,7 +383,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         
         
         -- Now we compare the plist's value for pwdSetDate to the one we just calculated so
-        -- we avoid using an old or bad value (i.e. when pwdLastSet can't be found by dscl)
+        -- we avoid using an old or bad value (i.e. when SMBPasswordLastSet can't be found by dscl)
         tell defaults to set plistPwdSetDate to objectForKey_("pwdSetDate") as real
         statusMenu's setAutoenablesItems_(false)
         if plistPwdSetDate is less than or equal to pwdSetDate then
