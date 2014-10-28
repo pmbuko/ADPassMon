@@ -76,6 +76,8 @@ script ADPassMonAppDelegate
     property mySearchBase : ""
     property expireAge : ""
     property expireAgeUnix : ""
+    property passExpires : true
+    property uAC : ""
     property pwdSetDate : ""
     property pwdSetDateUnix : ""
     property plistPwdSetDate : ""
@@ -243,6 +245,15 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell application "Ticket Viewer" to activate
     end ticketViewer_
     
+    -- Check if password is set to never expire
+    on canPassExpire_(sender)
+        set my uAC to (do shell script "/usr/bin/dscl localhost read /Search/Users/$USER userAccountControl | /usr/bin/awk '/:userAccountControl:/{print $2}'")
+        if (count words of uAC) is greater than 1 then
+            set my uAC to last word of uAC
+        end if
+        if first character of uAC is "6" then set passExpires to false
+    end canPassExpire_
+    
     -- Checks for kerberos ticket, necessary for auto method. Also bound to Refresh Kerb menu item.
     on doKerbCheck_(sender)
         if skipKerb is false then
@@ -377,9 +388,9 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         if (count words of pwdSetDateUnix) is greater than 1 then
             set my pwdSetDateUnix to last word of pwdSetDateUnix
         end if
-        set my pwdSetDateUnix to ((pwdSetDateUnix as integer) / 10000000 - 1.16444736E+10)
+        set my pwdSetDateUnix to ((pwdSetDateUnix as integer) / 10000000 - 11644473600)
         set my pwdSetDate to fmt's stringFromNumber_(pwdSetDateUnix / 86400)
-        log "  The new pwdSetDate (" & pwdSetDate & ")"
+        log "  New pwdSetDate (" & pwdSetDate & ") is"
         
         
         -- Now we compare the plist's value for pwdSetDate to the one we just calculated so
@@ -387,14 +398,14 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to set plistPwdSetDate to objectForKey_("pwdSetDate") as real
         statusMenu's setAutoenablesItems_(false)
         if plistPwdSetDate is less than or equal to pwdSetDate then
-            log "    is ≥ value in plist (" & plistPwdSetDate & ") so we use it"
+            log "  ≥ plist value (" & plistPwdSetDate & ") so we use it"
             tell defaults to setObject_forKey_(pwdSetDate, "pwdSetDate")
             -- If we can get a valid pwdSetDate, then we're on the network, so enable kerb features
             set my skipKerb to false
             statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(not skipKerb)
             statusMenu's itemWithTitle_("Change Password…")'s setEnabled_(not skipKerb)
         else if plistPwdSetDate is greater than pwdSetDate then
-            log "    is < value in plist (" & plistPwdSetDate & ") so we ignore it"
+            log "  < plist value (" & plistPwdSetDate & ") so we ignore it"
             set my pwdSetDate to plistPwdSetDate
              -- If we can't get a valid pwdSetDate, then we're off the network, so disable kerb features
             set my skipKerb to true
@@ -410,8 +421,9 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         fmt's setUsesSignificantDigits_(true)
         fmt's setMaximumSignificantDigits_(7)
         fmt's setMinimumSignificantDigits_(1)
+        fmt's setDecimalSeparator_(".")
         try
-            set todayUnix to (do shell script "/bin/date +%s") as integer
+            set todayUnix to (do shell script "/bin/date +%s")
             set today to (todayUnix / 86400)
             set my daysUntilExp to fmt's stringFromNumber_(expireAge - (today - pwdSetDate)) as real -- removed 'as integer' to avoid rounding issue
             log "  daysUntilExp: " & daysUntilExp
@@ -441,12 +453,12 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     on doProcess_(sender)
         if selectedMethod = 0 then
             log "Starting auto process…"
-        else
+            else
             log "Starting manual process…"
         end if
-		try
+        try
             theWindow's displayIfNeeded()
-			set my isIdle to false
+            set my isIdle to false
             set my theMessage to "Working…"
             
             -- Do this if we haven't run before, or the defaults have been reset.
@@ -463,15 +475,14 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             getExpirationDate_(daysUntilExp)
             updateMenuTitle_("[" & daysUntilExpNice & "d]", "Password expires on " & expirationDate)
             
-			set my theMessage to "Your password will expire in " & daysUntilExpNice & " days on
+            set my theMessage to "Your password will expire in " & daysUntilExpNice & " days on
 " & expirationDate
             set my isIdle to true
-            
-			log "Finished process"
+
             doNotify_(daysUntilExpNice)
         on error theError
             errorOut_(theError, 1)
-		end try
+        end try
 	end doProcess_
 
 --- INTERFACE BINDING HANDLERS ---
@@ -578,6 +589,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to removeObjectForKey_("myLDAP")
         tell defaults to removeObjectForKey_("pwPolicy")
         tell defaults to removeObjectForKey_("mavAccTest")
+        do shell script "defaults delete org.pmbuko.ADPassMon"
         retrieveDefaults_(me)
         statusMenuController's updateDisplay()
         set my theMessage to "ADPassMon has been reset.
@@ -652,7 +664,7 @@ Please choose your configuration options."
 		statusMenu's addItem_(my NSMenuItem's separatorItem)
 		
 		set menuItem to (my NSMenuItem's alloc)'s init
-		menuItem's setTitle_("Quit ADPassMon")
+		menuItem's setTitle_("Exit")
 		menuItem's setTarget_(me)
 		menuItem's setAction_("quit:")
 		menuItem's setEnabled_(true)
@@ -673,31 +685,37 @@ Please choose your configuration options."
         notifySetup_(me)
         retrieveDefaults_(me)
         createMenu_(me)
-        
-        if my expireAge = 0 and my selectedMethod = 0 then -- if we're using Auto and we don't have the password expiration age, check for kerberos ticket
-            doKerbCheck_(me)
-            if prefsLocked as integer is equal to 0 then -- only display the window if Prefs are not locked
-                log "in the loop"
-                theWindow's makeKeyAndOrderFront_(null) -- open the prefs window when running for first (assumption?) time
-                set my theMessage to "Welcome!
+        canPassExpire_(me)
+        if passExpires then
+            if my expireAge = 0 and my selectedMethod = 0 then -- if we're using Auto and we don't have the password expiration age, check for kerberos ticket
+                doKerbCheck_(me)
+                if prefsLocked as integer is equal to 0 then -- only display the window if Prefs are not locked
+                    log "in the loop"
+                    theWindow's makeKeyAndOrderFront_(null) -- open the prefs window when running for first (assumption?) time
+                    set my theMessage to "Welcome!
 Please choose your configuration options."
+                end if
+            else if my selectedMethod is 1 then
+                set my manualExpireDays to expireAge
+                set my isHidden to true
+                set my isManualEnabled to true
+                doProcess_(me)
+            else if my selectedMethod is 0 then
+                set my isHidden to false
+                set my isManualEnabled to false
+                set my manualExpireDays to ""
+                doProcess_(me)
             end if
-        else if my selectedMethod is 1 then
-            set my manualExpireDays to expireAge
-            set my isHidden to true
-            set my isManualEnabled to true
-            doProcess_(me)
-        else if my selectedMethod is 0 then
-            set my isHidden to false
-            set my isManualEnabled to false
-            set my manualExpireDays to ""
-            doProcess_(me)
+        
+            watchForWake_(me)
+        
+            -- Set a timer to trigger doProcess handler every 12 hrs and spawn notifications (if enabled).
+            NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(43200, me, "doProcess:", missing value, true)
+        else
+            log "Password does not exipire. Stopping."
+            updateMenuTitle_("[--]", "Your password does not expire.")
+            set my theMessage to "Your password does not expire."
         end if
-        
-        watchForWake_(me)
-        
-        -- Set a timer to trigger doProcess handler every 12 hrs and spawn notifications (if enabled).
-        NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(43200, me, "doProcess:", missing value, true)
     end applicationWillFinishLaunching_
     
 	on applicationShouldTerminate_(sender)
