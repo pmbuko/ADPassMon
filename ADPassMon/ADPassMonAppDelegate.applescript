@@ -61,10 +61,12 @@ script ADPassMonAppDelegate
     property isHidden : false
     property isManualEnabled : false
     property enableNotifications : false
+    property enableKerbRefresher : false
     property prefsLocked : false
     property launchAtLogin : false
     property skipKerb : false
     property showChangePass : false
+    property KerbRefresherInstalled : false
     
 --- Other Properties
 
@@ -176,6 +178,16 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         end if
     end accEnable_
     
+    on KerbRefresherTest_(sender)
+        tell application "Finder"
+            if exists "/Library/Application Support/crankd/KerbRefresher.py" as POSIX file then
+                set my KerbRefresherInstalled to true
+            else
+                set my KerbRefresherInstalled to false
+            end if
+        end tell
+    end KerbRefresherTest_
+
     -- Register plist default settings
     on regDefaults_(sender)
         tell current application's NSUserDefaults to set defaults to standardUserDefaults()
@@ -190,6 +202,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                                             myLDAP:myLDAP, ¬
                                             pwPolicy:pwPolicy, ¬
                                             mavAccTest:mavAccTest, ¬
+                                            enableKerbRefresher:enableKerbRefresher, ¬
                                             launchAtLogin:launchAtLogin})
     end regDefaults_
     
@@ -204,6 +217,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to set my myLDAP to objectForKey_("myLDAP")
         tell defaults to set my pwPolicy to objectForKey_("pwPolicy")
         tell defaults to set my mavAccTest to objectForKey_("mavAccTest")
+        tell defaults to set my enableKerbRefresher to objectForKey_("enableKerbRefresher")
         tell defaults to set my launchAtLogin to objectForKey_("launchAtLogin")
 	end retrieveDefaults_
 
@@ -247,11 +261,21 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     
     -- Check if password is set to never expire
     on canPassExpire_(sender)
+        log "Testing if password can expire…"
         set my uAC to (do shell script "/usr/bin/dscl localhost read /Search/Users/$USER userAccountControl | /usr/bin/awk '/:userAccountControl:/{print $2}'")
         if (count words of uAC) is greater than 1 then
             set my uAC to last word of uAC
         end if
-        if first character of uAC is "6" then set passExpires to false
+        try
+            if first character of uAC is "6" then
+                set passExpires to false
+                log "  Password does NOT expire."
+            else
+                log "  Password does expire."
+            end if
+        on error
+            log "  Could not determine if password expires."
+        end try
     end canPassExpire_
     
     -- Checks for kerberos ticket, necessary for auto method. Also bound to Refresh Kerb menu item.
@@ -577,7 +601,19 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         end if
     end toggleNotify_
     
-    -- Bound to Revert button in Prefs window (REMOVE ON RELEASE)
+    on toggleKerbRefresher_(sender)
+        if my enableKerbRefresher is true then
+            set my enableKerbRefresher to false
+            tell defaults to setObject_forKey_(enableKerbRefresher, "enableKerbRefresher")
+            my statusMenu's itemWithTitle_("Use KerbRefresher")'s setState_(0)
+        else
+            set my enableKerbRefresher to true
+            tell defaults to setObject_forKey_(enableKerbRefresher, "enableKerbRefresher")
+            my statusMenu's itemWithTitle_("Use KerbRefresher")'s setState_(1)
+        end if
+    end toggleKerbRefresher_
+
+-- Bound to Revert button in Prefs window (REMOVE ON RELEASE)
     on revertDefaults_(sender)
         tell defaults to removeObjectForKey_("menu_title")
         tell defaults to removeObjectForKey_("tooltip")
@@ -589,6 +625,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to removeObjectForKey_("myLDAP")
         tell defaults to removeObjectForKey_("pwPolicy")
         tell defaults to removeObjectForKey_("mavAccTest")
+        tell defaults to removeObjectForKey_("enableKerbRefresher")
         do shell script "defaults delete org.pmbuko.ADPassMon"
         retrieveDefaults_(me)
         statusMenuController's updateDisplay()
@@ -618,6 +655,16 @@ Please choose your configuration options."
         menuItem's setState_(enableNotifications)
         statusMenu's addItem_(menuItem)
 		menuItem's release()
+        
+        set menuItem to (my NSMenuItem's alloc)'s init
+        menuItem's setTitle_("Use KerbRefresher")
+        menuItem's setTarget_(me)
+        menuItem's setAction_("toggleKerbRefresher:")
+        menuItem's setEnabled_(true)
+        menuItem's setHidden_(not KerbRefresherInstalled)
+        menuItem's setState_(enableKerbRefresher)
+        statusMenu's addItem_(menuItem)
+        menuItem's release()
         
         set menuItem to (my NSMenuItem's alloc)'s init
         menuItem's setTitle_("Preferences…")
@@ -682,6 +729,7 @@ Please choose your configuration options."
         getOS_(me)
         regDefaults_(me) -- populate plist file with defaults (will not overwrite non-default settings))
         accTest_(me)
+        KerbRefresherTest_(me)
         notifySetup_(me)
         retrieveDefaults_(me)
         createMenu_(me)
