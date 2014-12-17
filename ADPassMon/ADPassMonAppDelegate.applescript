@@ -61,12 +61,12 @@ script ADPassMonAppDelegate
     property isHidden : false
     property isManualEnabled : false
     property enableNotifications : false
-    property enableKerbRefresher : false
+    property enableKerbMinder : false
     property prefsLocked : false
     property launchAtLogin : false
     property skipKerb : false
     property showChangePass : false
-    property KerbRefresherInstalled : false
+    property KerbMinderInstalled : false
     
 --- Other Properties
 
@@ -82,7 +82,7 @@ script ADPassMonAppDelegate
     property uAC : ""
     property pwdSetDate : ""
     property pwdSetDateUnix : ""
-    property plistPwdSetDate : ""
+    property plistPwdSetDate : 0
     property pwPolicy : ""
     property today : ""
     property todayUnix : ""
@@ -178,15 +178,15 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         end if
     end accEnable_
     
-    on KerbRefresherTest_(sender)
+    on KerbMinderTest_(sender)
         tell application "Finder"
-            if exists "/Library/Application Support/crankd/KerbRefresher.py" as POSIX file then
-                set my KerbRefresherInstalled to true
+            if exists "/Library/Application Support/crankd/KerbMinder.py" as POSIX file then
+                set my KerbMinderInstalled to true
             else
-                set my KerbRefresherInstalled to false
+                set my KerbMinderInstalled to false
             end if
         end tell
-    end KerbRefresherTest_
+    end KerbMinderTest_
 
     -- Register plist default settings
     on regDefaults_(sender)
@@ -202,7 +202,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                                             myLDAP:myLDAP, ¬
                                             pwPolicy:pwPolicy, ¬
                                             mavAccTest:mavAccTest, ¬
-                                            enableKerbRefresher:enableKerbRefresher, ¬
+                                            enableKerbMinder:enableKerbMinder, ¬
                                             launchAtLogin:launchAtLogin})
     end regDefaults_
     
@@ -217,7 +217,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to set my myLDAP to objectForKey_("myLDAP")
         tell defaults to set my pwPolicy to objectForKey_("pwPolicy")
         tell defaults to set my mavAccTest to objectForKey_("mavAccTest")
-        tell defaults to set my enableKerbRefresher to objectForKey_("enableKerbRefresher")
+        tell defaults to set my enableKerbMinder to objectForKey_("enableKerbMinder")
         tell defaults to set my launchAtLogin to objectForKey_("launchAtLogin")
 	end retrieveDefaults_
 
@@ -285,7 +285,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                 if osVersion is less than 7 then
                     try
                         log "Testing for kerberos ticket presence…"
-                        set kerb to do shell script "/usr/bin/klist | /usr/bin/grep krbtgt"
+                        set kerb to do shell script "/usr/bin/klist -t"
                         set renewKerb to do shell script "/usr/bin/kinit -R"
                         log "  Ticket found and renewed"
                         set my isIdle to true
@@ -322,7 +322,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     on doLionKerb_(sender)
         try
             log "Testing for Kerberos ticket presence…"
-            set kerb to do shell script "/usr/bin/klist | /usr/bin/grep krbtgt"
+            set kerb to do shell script "/usr/bin/klist -t"
             set renewKerb to do shell script "/usr/bin/kinit -R"
             log "  Ticket found and renewed"
             set my isIdle to true
@@ -414,14 +414,20 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         end if
         set my pwdSetDateUnix to ((pwdSetDateUnix as integer) / 10000000 - 11644473600)
         set my pwdSetDate to fmt's stringFromNumber_(pwdSetDateUnix / 86400)
-        log "  New pwdSetDate (" & pwdSetDate & ") is"
+        log "  New pwdSetDate (" & pwdSetDate & ")"
         
         
         -- Now we compare the plist's value for pwdSetDate to the one we just calculated so
         -- we avoid using an old or bad value (i.e. when SMBPasswordLastSet can't be found by dscl)
         tell defaults to set plistPwdSetDate to objectForKey_("pwdSetDate") as real
         statusMenu's setAutoenablesItems_(false)
-        if plistPwdSetDate is less than or equal to pwdSetDate then
+        if plistPwdSetDate is equal to 0 then
+            set my skipKerb to true
+            log "  will be saved to plist."
+            tell defaults to setObject_forKey_(pwdSetDate, "pwdSetDate")
+            statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(not skipKerb)
+            statusMenu's itemWithTitle_("Change Password…")'s setEnabled_(not skipKerb)
+        else if plistPwdSetDate is less than or equal to pwdSetDate then
             log "  ≥ plist value (" & plistPwdSetDate & ") so we use it"
             tell defaults to setObject_forKey_(pwdSetDate, "pwdSetDate")
             -- If we can get a valid pwdSetDate, then we're on the network, so enable kerb features
@@ -601,17 +607,17 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         end if
     end toggleNotify_
     
-    on toggleKerbRefresher_(sender)
-        if my enableKerbRefresher is true then
-            set my enableKerbRefresher to false
-            tell defaults to setObject_forKey_(enableKerbRefresher, "enableKerbRefresher")
-            my statusMenu's itemWithTitle_("Use KerbRefresher")'s setState_(0)
+    on toggleKerbMinder_(sender)
+        if my enableKerbMinder is true then
+            set my enableKerbMinder to false
+            tell defaults to setObject_forKey_(enableKerbMinder, "enableKerbMinder")
+            my statusMenu's itemWithTitle_("Use KerbMinder")'s setState_(0)
         else
-            set my enableKerbRefresher to true
-            tell defaults to setObject_forKey_(enableKerbRefresher, "enableKerbRefresher")
-            my statusMenu's itemWithTitle_("Use KerbRefresher")'s setState_(1)
+            set my enableKerbMinder to true
+            tell defaults to setObject_forKey_(enableKerbMinder, "enableKerbMinder")
+            my statusMenu's itemWithTitle_("Use KerbMinder")'s setState_(1)
         end if
-    end toggleKerbRefresher_
+    end toggleKerbMinder_
 
 -- Bound to Revert button in Prefs window (REMOVE ON RELEASE)
     on revertDefaults_(sender)
@@ -625,7 +631,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to removeObjectForKey_("myLDAP")
         tell defaults to removeObjectForKey_("pwPolicy")
         tell defaults to removeObjectForKey_("mavAccTest")
-        tell defaults to removeObjectForKey_("enableKerbRefresher")
+        tell defaults to removeObjectForKey_("enableKerbMinder")
         do shell script "defaults delete org.pmbuko.ADPassMon"
         retrieveDefaults_(me)
         statusMenuController's updateDisplay()
@@ -657,12 +663,12 @@ Please choose your configuration options."
 		menuItem's release()
         
         set menuItem to (my NSMenuItem's alloc)'s init
-        menuItem's setTitle_("Use KerbRefresher")
+        menuItem's setTitle_("Use KerbMinder")
         menuItem's setTarget_(me)
-        menuItem's setAction_("toggleKerbRefresher:")
+        menuItem's setAction_("toggleKerbMinder:")
         menuItem's setEnabled_(true)
-        menuItem's setHidden_(not KerbRefresherInstalled)
-        menuItem's setState_(enableKerbRefresher)
+        menuItem's setHidden_(not KerbMinderInstalled)
+        menuItem's setState_(enableKerbMinder)
         statusMenu's addItem_(menuItem)
         menuItem's release()
         
@@ -729,7 +735,7 @@ Please choose your configuration options."
         getOS_(me)
         regDefaults_(me) -- populate plist file with defaults (will not overwrite non-default settings))
         accTest_(me)
-        KerbRefresherTest_(me)
+        KerbMinderTest_(me)
         notifySetup_(me)
         retrieveDefaults_(me)
         createMenu_(me)
