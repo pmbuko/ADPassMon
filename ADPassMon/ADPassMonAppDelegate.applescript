@@ -683,22 +683,6 @@ Please choose your configuration options."
 		statusMenu's addItem_(my NSMenuItem's separatorItem)
 		
 		set menuItem to (my NSMenuItem's alloc)'s init
-		menuItem's setTitle_("Refresh Kerberos Ticket")
-		menuItem's setTarget_(me)
-		menuItem's setAction_("doKerbCheck:")
-		menuItem's setEnabled_(not skipKerb)
-		statusMenu's addItem_(menuItem)
-		menuItem's release()
-        
-		set menuItem to (my NSMenuItem's alloc)'s init
-		menuItem's setTitle_("Launch Ticket Viewer")
-		menuItem's setTarget_(me)
-		menuItem's setAction_("ticketViewer:")
-		menuItem's setEnabled_(true)
-		statusMenu's addItem_(menuItem)
-		menuItem's release()
-        
-		set menuItem to (my NSMenuItem's alloc)'s init
 		menuItem's setTitle_("Re-check Expiration")
 		menuItem's setTarget_(me)
 		menuItem's setAction_("doProcess:")
