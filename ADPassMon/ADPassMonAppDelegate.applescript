@@ -425,21 +425,21 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             set my skipKerb to true
             log "  will be saved to plist."
             tell defaults to setObject_forKey_(pwdSetDate, "pwdSetDate")
-            statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(not skipKerb)
+            --statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(not skipKerb)
             statusMenu's itemWithTitle_("Change Password…")'s setEnabled_(not skipKerb)
         else if plistPwdSetDate is less than or equal to pwdSetDate then
             log "  ≥ plist value (" & plistPwdSetDate & ") so we use it"
             tell defaults to setObject_forKey_(pwdSetDate, "pwdSetDate")
             -- If we can get a valid pwdSetDate, then we're on the network, so enable kerb features
             set my skipKerb to false
-            statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(not skipKerb)
+            --statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(not skipKerb)
             statusMenu's itemWithTitle_("Change Password…")'s setEnabled_(not skipKerb)
         else if plistPwdSetDate is greater than pwdSetDate then
             log "  < plist value (" & plistPwdSetDate & ") so we ignore it"
             set my pwdSetDate to plistPwdSetDate
              -- If we can't get a valid pwdSetDate, then we're off the network, so disable kerb features
             set my skipKerb to true
-            statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(not skipKerb)
+            --statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(not skipKerb)
             statusMenu's itemWithTitle_("Change Password…")'s setEnabled_(not skipKerb)
         end if
     end getPwdSetDate_
