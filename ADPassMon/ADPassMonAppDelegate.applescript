@@ -84,6 +84,7 @@ script ADPassMonAppDelegate
     property pwdSetDateUnix : ""
     property plistPwdSetDate : 0
     property pwPolicy : ""
+    property pwPolicyButton : "OK"
     property today : ""
     property todayUnix : ""
     property daysUntilExp : ""
@@ -201,6 +202,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                                             prefsLocked:prefsLocked, ¬
                                             myLDAP:myLDAP, ¬
                                             pwPolicy:pwPolicy, ¬
+                                            pwPolicyButton:pwPolicyButton, ¬
                                             mavAccTest:mavAccTest, ¬
                                             enableKerbMinder:enableKerbMinder, ¬
                                             launchAtLogin:launchAtLogin})
@@ -216,6 +218,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to set my prefsLocked to objectForKey_("prefsLocked")
         tell defaults to set my myLDAP to objectForKey_("myLDAP")
         tell defaults to set my pwPolicy to objectForKey_("pwPolicy")
+        tell defaults to set my pwPolicyButton to objectForKey_("pwPolicyButton")
         tell defaults to set my mavAccTest to objectForKey_("mavAccTest")
         tell defaults to set my enableKerbMinder to objectForKey_("enableKerbMinder")
         tell defaults to set my launchAtLogin to objectForKey_("launchAtLogin")
@@ -526,9 +529,10 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     -- Bound to Change Password menu item
     on changePassword_(sender)
         tell defaults to set my pwPolicy to objectForKey_("pwPolicy") as string
+        tell defaults to set my pwPolicyButton to objectForKey_("pwPolicyButton") as string
         if my pwPolicy is not "" then
             tell application "System Events"
-                display dialog pwPolicy with icon 2 buttons {"OK"}
+                display dialog pwPolicy with icon 2 buttons {pwPolicyButton}
             end tell
         end if
         tell application "System Preferences"
@@ -630,6 +634,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to removeObjectForKey_("prefsLocked")
         tell defaults to removeObjectForKey_("myLDAP")
         tell defaults to removeObjectForKey_("pwPolicy")
+        tell defaults to removeObjectForKey_("pwPolicyButton")
         tell defaults to removeObjectForKey_("mavAccTest")
         tell defaults to removeObjectForKey_("enableKerbMinder")
         do shell script "defaults delete org.pmbuko.ADPassMon"
