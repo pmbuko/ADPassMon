@@ -379,6 +379,20 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         log "  myLDAP: " & myLDAP
     end getDNS_
     
+    -- Use dsconfigad to get domain name
+    -- Use dig to get AD LDAP server from domain name
+    on getADLDAP_(sender)
+        try
+            set myDomain to (do shell script "/usr/sbin/dsconfigad -show | /usr/bin/awk '/Active Directory Domain/{print $NF}'") as text
+            -- using "first paragraph" to return only the first ldap server returned by the query
+            set myLDAP to first paragraph of (do shell script "/usr/bin/dig -t srv _ldap._tcp." & myDomain & "| /usr/bin/awk '/^_ldap/{print $NF}'") as text
+        on error theError
+            errorOut_(theError)
+        end try
+        log "  myDomain: " & myDomain
+        log "  myADLDAP: " & myLDAP
+    end getADLDAP_
+    
     -- Use ldapsearch to get search base
     on getSearchBase_(sender)
         try
@@ -411,7 +425,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         fmt's setMinimumSignificantDigits_(1)
         fmt's setDecimalSeparator_(".")
         
-        set my pwdSetDateUnix to (do shell script "/usr/bin/dscl localhost read /Search/Users/$USER SMBPasswordLastSet | /usr/bin/awk '/LastSet:/{print $2}'")
+        set my pwdSetDateUnix to (do shell script "/usr/bin/dscl localhost read /Search/Users/\"$USER\" SMBPasswordLastSet | /usr/bin/awk '/LastSet:/{print $2}'")
         if (count words of pwdSetDateUnix) is greater than 1 then
             set my pwdSetDateUnix to last word of pwdSetDateUnix
         end if
@@ -496,7 +510,8 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             
             -- Do this if we haven't run before, or the defaults have been reset.
             if my expireAge = 0 and my selectedMethod = 0 then
-                getDNS_(me)
+                --getDNS_(me)
+                getADLDAP_(me)
                 getSearchBase_(me)
                 getExpireAge_(me)
             else
