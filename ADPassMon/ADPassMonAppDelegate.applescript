@@ -3,9 +3,8 @@
 --  ADPassMon
 --
 --  Created by Peter Bukowinski on 3/24/11.
-
 --  This software is released under the terms of the MIT license.
---  Copyright (C) 2014 by Peter Bukowinski
+--  Copyright (C) 2015 by Peter Bukowinski
 --
 --  Permission is hereby granted, free of charge, to any person obtaining a copy
 --  of this software and associated documentation files (the "Software"), to deal
@@ -37,9 +36,9 @@ script ADPassMonAppDelegate
 --- PROPERTIES ---    
 
 --- Classes
-	property parent : class "NSObject"
+    property parent : class "NSObject"
     property NSMenu : class "NSMenu"
-	property NSMenuItem : class "NSMenuItem"
+    property NSMenuItem : class "NSMenuItem"
     property NSTimer : class "NSTimer" -- so we can do stuff at regular intervals
     property NSWorkspace : class "NSWorkspace" -- for sleep notification
 
@@ -49,7 +48,7 @@ script ADPassMonAppDelegate
     property statusMenuController : missing value
     property theWindow : missing value
     property defaults : missing value -- for saved prefs
-    property theMessage : missing value -- for stats display in pref window -- consider removing
+    property theMessage : missing value -- for stats display in pref window
     property manualExpireDays : missing value
     property selectedMethod : missing value
     property warningDays : missing value
@@ -60,16 +59,18 @@ script ADPassMonAppDelegate
     property isIdle : true
     property isHidden : false
     property isManualEnabled : false
-    property enableNotifications : false
+    property enableNotifications : true
     property enableKerbMinder : false
     property prefsLocked : false
     property launchAtLogin : false
     property skipKerb : false
+    property onDomain : false
+    property passExpires : true
+    property goEasy : false
     property showChangePass : false
     property KerbMinderInstalled : false
     
 --- Other Properties
-
     property mavAccTest : 1
     property tooltip : "Waiting for data…"
     property osVersion : ""
@@ -78,7 +79,8 @@ script ADPassMonAppDelegate
     property mySearchBase : ""
     property expireAge : ""
     property expireAgeUnix : ""
-    property passExpires : true
+    property expireDate: ""
+    property expireDateUnix: ""
     property uAC : ""
     property pwdSetDate : ""
     property pwdSetDateUnix : ""
@@ -93,20 +95,20 @@ script ADPassMonAppDelegate
     property mavAccStatus : ""
 
 --- HANDLERS ---
-    
+
     -- General error handler
     on errorOut_(theError, showErr)
         log "Script Error: " & theError
         --if showErr = 1 then set my theMessage to theError as text
         --set isIdle to false
     end errorOut_
-    
+
     -- Need to get the OS version so we can handle Kerberos differently in 10.7+
     on getOS_(sender)
         set my osVersion to (do shell script "sw_vers -productVersion | awk -F. '{print $2}'") as integer
         log "Running on OS 10." & osVersion & ".x"
     end getOS_
-    
+
     -- Tests if Universal Access scripting service is enabled
     on accTest_(sender)
         log "Testing Universal Access settings…"
@@ -178,7 +180,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             log "  Skipping because user not an admin"
         end if
     end accEnable_
-    
+
     on KerbMinderTest_(sender)
         tell application "Finder"
             if exists "/Library/Application Support/crankd/KerbMinder.py" as POSIX file then
@@ -196,7 +198,9 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                                             tooltip:tooltip, ¬
                                             selectedMethod:0, ¬
                                             isManualEnabled:isManualEnabled, ¬
-                                            expireAge:0, ¬
+                                            enableNotifications:enableNotifications, ¬
+                                            expireAge:expireAge, ¬
+                                            expireDateUnix:0, ¬
                                             pwdSetDate:0, ¬
                                             warningDays:14, ¬
                                             prefsLocked:prefsLocked, ¬
@@ -207,13 +211,15 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                                             enableKerbMinder:enableKerbMinder, ¬
                                             launchAtLogin:launchAtLogin})
     end regDefaults_
-    
+
     -- Get values from plist
-	on retrieveDefaults_(sender)
+    on retrieveDefaults_(sender)
         tell defaults to set my selectedMethod to objectForKey_("selectedMethod") as integer
         tell defaults to set my isManualEnabled to objectForKey_("isManualEnabled") as integer
-		tell defaults to set my expireAge to objectForKey_("expireAge") as integer
-		tell defaults to set my pwdSetDate to objectForKey_("pwdSetDate") as integer
+        tell defaults to set my enableNotifications to objectForKey_("enableNotifications") as integer
+        tell defaults to set my expireAge to objectForKey_("expireAge") as integer
+        tell defaults to set my expireDateUnix to objectForKey_("expireDateUnix") as integer
+        tell defaults to set my pwdSetDate to objectForKey_("pwdSetDate") as integer
         tell defaults to set my warningDays to objectForKey_("warningDays")
         tell defaults to set my prefsLocked to objectForKey_("prefsLocked")
         tell defaults to set my myLDAP to objectForKey_("myLDAP")
@@ -222,7 +228,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to set my mavAccTest to objectForKey_("mavAccTest")
         tell defaults to set my enableKerbMinder to objectForKey_("enableKerbMinder")
         tell defaults to set my launchAtLogin to objectForKey_("launchAtLogin")
-	end retrieveDefaults_
+    end retrieveDefaults_
 
     on notifySetup_(sender)
         if osVersion is less than 8 then
@@ -231,7 +237,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             set my enableNotifications to true
         end if
     end notifySetup_
-    
+
     -- This handler is sent daysUntilExpNice and will trigger an alert if ≤ warningDays
     on doNotify_(sender)
         if sender as integer ≤ my warningDays as integer then
@@ -244,24 +250,47 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             end if
         end if
     end doNotify_
-    
+
     on sendNotificationWithTitleAndMessage_(aTitle, aMessage)
         set myNotification to current application's NSUserNotification's alloc()'s init()
         set myNotification's title to aTitle
         set myNotification's informativeText to aMessage
         current application's NSUserNotificationCenter's defaultUserNotificationCenter's deliverNotification_(myNotification)
     end sendNotificationWithTitleAndMessage_
-        
+
     -- Trigger doProcess handler on wake from sleep
     on watchForWake_(sender)
         tell (NSWorkspace's sharedWorkspace())'s notificationCenter() to ¬
             addObserver_selector_name_object_(me, "doProcess:", "NSWorkspaceDidWakeNotification", missing value)
     end watchForWake_
-    
+
     on ticketViewer_(sender)
         tell application "Ticket Viewer" to activate
     end ticketViewer_
     
+    on domainTest_(sender)
+        set domain to (do shell script "/usr/sbin/dsconfigad -show | /usr/bin/awk '/Active Directory Domain/{print $NF}'") as text
+        try
+            set digResult to (do shell script "/usr/bin/dig +time=2 +tries=1 -t srv _ldap._tcp." & domain) as text
+        on error theError
+            log "Domain test timed out."
+            set my onDomain to false
+            my statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(0)
+            my statusMenu's itemWithTitle_("Change Password…")'s setEnabled_(0)
+            return
+        end try
+        if "ANSWER SECTION" is in digResult then
+            set my onDomain to true
+            my statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(1)
+            my statusMenu's itemWithTitle_("Change Password…")'s setEnabled_(1)
+        else
+            set my onDomain to false
+            log "Domain not reachable."
+            my statusMenu's itemWithTitle_("Refresh Kerberos Ticket")'s setEnabled_(0)
+            my statusMenu's itemWithTitle_("Change Password…")'s setEnabled_(0)
+        end if
+    end domainTest_
+
     -- Check if password is set to never expire
     on canPassExpire_(sender)
         log "Testing if password can expire…"
@@ -280,10 +309,10 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             log "  Could not determine if password expires."
         end try
     end canPassExpire_
-    
+
     -- Checks for kerberos ticket, necessary for auto method. Also bound to Refresh Kerb menu item.
     on doKerbCheck_(sender)
-        if skipKerb is false then
+        if my onDomain is true and my skipKerb is false then
             if selectedMethod = 0 then
                 if osVersion is less than 7 then
                     try
@@ -320,7 +349,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             doProcess_(me)
         end if
     end doKerbCheck_
-    
+
     -- Need to handle Lion's kerberos differently from older OSes
     on doLionKerb_(sender)
         try
@@ -339,22 +368,22 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             activate
             set response to (display dialog "No Kerberos ticket for Active Directory was found. Do you want to renew it?" with icon 2 buttons {"No","Yes"} default button "Yes")
             if button returned of response is "Yes" then
-				renewLionKerb_(me)
+                renewLionKerb_(me)
             else -- if No is clicked
                 log "  User chose not to acquire"
                 errorOut_(theError, 1)
             end if
         end try
     end doLionKerb_
-    
-	-- Runs when Yes of Lion kerberos renewal dialog (from above) is clicked.
-	on renewLionKerb_(sender)
-		try
-			set thePassword to text returned of (display dialog "Enter your Active Directory password:" default answer "" with hidden answer)
-			do shell script "/bin/echo '" & thePassword & "' | /usr/bin/kinit -l 10h -r 10h --password-file=STDIN"
+
+    -- Runs when Yes of Lion kerberos renewal dialog (from above) is clicked.
+    on renewLionKerb_(sender)
+        try
+            set thePassword to text returned of (display dialog "Enter your Active Directory password:" default answer "" with hidden answer)
+            do shell script "/bin/echo '" & thePassword & "' | /usr/bin/kinit -l 10h -r 10h --password-file=STDIN"
             log "  Ticket acquired"
-			display dialog "Kerberos ticket acquired." with icon 1 buttons {"OK"} default button 1
-			doLionKerb_(me)
+            display dialog "Kerberos ticket acquired." with icon 1 buttons {"OK"} default button 1
+            doLionKerb_(me)
         on error
             try
                 set thePassword to text returned of (display dialog "Password incorrect. Please try again:" default answer "" with icon 2 with hidden answer)
@@ -365,9 +394,9 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                 log "  Incorrect password. Skipping."
                 display dialog "Too many incorrect attempts. Stopping to avoid account lockout." with icon 2 buttons {"OK"} default button 1
             end try
-		end try
-	end renewLionKerb_
-    
+        end try
+    end renewLionKerb_
+
     -- Use scutil to get AD DNS info
     on getDNS_(sender)
         try
@@ -378,21 +407,33 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         end try
         log "  myLDAP: " & myLDAP
     end getDNS_
-    
+
     -- Use dsconfigad to get domain name
     -- Use dig to get AD LDAP server from domain name
     on getADLDAP_(sender)
         try
             set myDomain to (do shell script "/usr/sbin/dsconfigad -show | /usr/bin/awk '/Active Directory Domain/{print $NF}'") as text
-            -- using "first paragraph" to return only the first ldap server returned by the query
-            set myLDAP to first paragraph of (do shell script "/usr/bin/dig -t srv _ldap._tcp." & myDomain & "| /usr/bin/awk '/^_ldap/{print $NF}'") as text
+            try
+                set myLDAPresult to (do shell script "/usr/bin/dig +time=2 +tries=1 -t srv _ldap._tcp." & myDomain) as text
+            on error theError
+                log "Domain test timed out."
+                set my onDomain to false
+            end try
+            if "ANSWER SECTION" is in myLDAPresult then
+                set my onDomain to true
+                -- using "first paragraph" to return only the first ldap server returned by the query
+                set myLDAP to last paragraph of (do shell script "/usr/bin/dig -t srv _ldap._tcp." & myDomain & "| /usr/bin/awk '/^_ldap/{print $NF}'") as text
+                log "  myDomain: " & myDomain
+                log "  myADLDAP: " & myLDAP
+            else
+                set my onDomain to false
+                log "  Can't reach " & myDomain & " domain"
+            end if
         on error theError
             errorOut_(theError)
         end try
-        log "  myDomain: " & myDomain
-        log "  myADLDAP: " & myLDAP
     end getADLDAP_
-    
+
     -- Use ldapsearch to get search base
     on getSearchBase_(sender)
         try
@@ -407,15 +448,19 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     -- Use ldapsearch to get password expiration age
     on getExpireAge_(sender)
         try
-            set my expireAgeUnix to (do shell script "/usr/bin/ldapsearch -LLL -Q -s base -H ldap://" & myLDAP & " -b " & mySearchBase & " maxPwdAge | /usr/bin/awk -F- '/maxPwdAge/{print $2/10000000}'") as integer
-            set my expireAge to expireAgeUnix / 86400 as integer
-            log "  Got expireAge: " & expireAge
-            tell defaults to setObject_forKey_(expireAge, "expireAge")
+            set my expireAgeUnix to (do shell script "/usr/bin/ldapsearch -LLL -Q -s base -H ldap://" & myLDAP & " -b " & mySearchBase & " maxPwdAge | /usr/bin/awk -F- '/maxPwdAge/{print $NF/10000000}'") as integer
+            if expireAgeUnix is equal to 0 then
+                log "  Couldn't get expireAge. Trying using Manual method."
+            else
+                set my expireAge to expireAgeUnix / 86400 as integer
+                log "  Got expireAge: " & expireAge
+                tell defaults to setObject_forKey_(expireAge, "expireAge")
+            end if
         on error theError
             errorOut_(theError, 1)
         end try
     end getExpireAge_
-    
+
     -- Determine when the password was last changed
     on getPwdSetDate_(sender)
         -- number formatter for truncated decimal places
@@ -426,11 +471,13 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         fmt's setDecimalSeparator_(".")
         
         set my pwdSetDateUnix to (do shell script "/usr/bin/dscl localhost read /Search/Users/\"$USER\" SMBPasswordLastSet | /usr/bin/awk '/LastSet:/{print $2}'")
-        if (count words of pwdSetDateUnix) is greater than 1 then
+        if (count words of pwdSetDateUnix) is greater than 0 then
             set my pwdSetDateUnix to last word of pwdSetDateUnix
+            set my pwdSetDateUnix to ((pwdSetDateUnix as integer) / 10000000 - 11644473600)
+            set my pwdSetDate to fmt's stringFromNumber_(pwdSetDateUnix / 86400)
+        else if (count words of pwdSetDateUnix) is equal to 0 then
+            set my pwdSetDate to -1
         end if
-        set my pwdSetDateUnix to ((pwdSetDateUnix as integer) / 10000000 - 11644473600)
-        set my pwdSetDate to fmt's stringFromNumber_(pwdSetDateUnix / 86400)
         log "  New pwdSetDate (" & pwdSetDate & ")"
         
         
@@ -460,7 +507,37 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             statusMenu's itemWithTitle_("Change Password…")'s setEnabled_(not skipKerb)
         end if
     end getPwdSetDate_
+
+    -- Uses 'msDS-UserPasswordExpiryTimeComputed' value from AD to get expiration date.
+    on easyMethod_(sender)
+        try
+            set userName to short user name of (system info)
+            set expireDateResult to  (do shell script "/usr/bin/dscl localhost read /Search/Users/" & userName & " msDS-UserPasswordExpiryTimeComputed")
+            if "msDS-UserPasswordExpiryTimeComputed" is in expireDateResult then
+                set my goEasy to true
+                set my expireDate to last word of expireDateResult
+            else
+                set my goEasy to false
+                return
+            end if
+            set my expireDateUnix to do shell script "echo '(" & expireDate & "/10000000)-11644473600' | /usr/bin/bc"
+            log "  Got expireDateUnix: " & expireDateUnix
+            tell defaults to setObject_forKey_(expireDateUnix, "expireDateUnix")
+        on error theError
+            errorOut_(theError, 1)
+        end try
+    end easyMethod_
     
+    on easyDate_(timestamp)
+        set my expirationDate to do shell script "/bin/date -r " & timestamp
+        set todayUnix to do shell script "/bin/date +%s"
+        set my daysUntilExp to ((timestamp - todayUnix) / 86400)
+        log "    daysUntilExp: " & daysUntilExp
+        set my daysUntilExpNice to round daysUntilExp rounding toward zero
+        log "    daysUntilExpNice: " & daysUntilExpNice
+    end easyDate_
+    
+
     -- Calculate the number of days until password expiration
     on compareDates_(sender)
         -- number formatter for truncated decimal places
@@ -480,8 +557,8 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             errorOut_(theError, 1)
         end try
     end compareDates_
-    
-    -- Get the full date of password expiration but strip off the time. daysUntilExp is input.
+
+    -- Get the full date of password expiration. daysUntilExp is input.
     on getExpirationDate_(remaining)
         set fullDate to (current date) + (remaining * days) as text
         --set my expirationDate to text 1 thru ((offset of ":" in fullDate) - 3) of fullDate -- this truncates the time
@@ -495,43 +572,59 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to setObject_forKey_(tooltip, "tooltip")
         statusMenuController's updateDisplay()
     end updateMenuTitle_
-    
+
     -- The meat of the app; gets the data and does the calculations 
     on doProcess_(sender)
+        domainTest_(me)
         if selectedMethod = 0 then
             log "Starting auto process…"
-            else
+        else
             log "Starting manual process…"
         end if
+        
         try
-            theWindow's displayIfNeeded()
-            set my isIdle to false
-            set my theMessage to "Working…"
+            if my onDomain is true then
+                theWindow's displayIfNeeded()
+                set my isIdle to false
+                set my theMessage to "Working…"
             
-            -- Do this if we haven't run before, or the defaults have been reset.
-            if my expireAge = 0 and my selectedMethod = 0 then
-                --getDNS_(me)
-                getADLDAP_(me)
-                getSearchBase_(me)
-                getExpireAge_(me)
-            else
-                log "  Found expireAge in plist: " & expireAge
-            end if
-            
-            getPwdSetDate_(me)
-            compareDates_(me)
-            getExpirationDate_(daysUntilExp)
-            updateMenuTitle_("[" & daysUntilExpNice & "d]", "Password expires on " & expirationDate)
-            
-            set my theMessage to "Your password will expire in " & daysUntilExpNice & " days on
-" & expirationDate
-            set my isIdle to true
+                -- Do this if we haven't run before, or the defaults have been reset.
+                if my expireDateUnix = 0 and my selectedMethod = 0 then
+                    getADLDAP_(me)
+                    easyMethod_(me)
+                    if my goEasy is false then
+                        getSearchBase_(me)
+                        getExpireAge_(me)
+                    end if
+                else
+                    log "  Found expireDateUnix in plist: " & expireDateUnix
+                end if
 
-            doNotify_(daysUntilExpNice)
+                easyMethod_(me)
+                if my goEasy is true and my selectedMethod = 0 then
+                    log "  Using msDS method"
+                    easyDate_(expireDateUnix)
+                else
+                    log "  Using alt method"
+                    getPwdSetDate_(me)
+                    compareDates_(me)
+                    getExpirationDate_(daysUntilExp)
+                end if
+                
+                updateMenuTitle_("[" & daysUntilExpNice & "d]", "Your password expires\n" & expirationDate)
+                
+                set my theMessage to "Your password expires in " & daysUntilExpNice & " days\non " & expirationDate
+                set my isIdle to true
+                
+                doNotify_(daysUntilExpNice)
+            
+            else
+                log " Stopping."
+            end if
         on error theError
             errorOut_(theError, 1)
         end try
-	end doProcess_
+    end doProcess_
 
 --- INTERFACE BINDING HANDLERS ---
 
@@ -573,15 +666,15 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     end changePassword_
     
     -- Bound to Prefs menu item
-	on showMainWindow_(sender)
-		activate
-		theWindow's makeKeyAndOrderFront_(null)
-	end showMainWindow_
+    on showMainWindow_(sender)
+        activate
+        theWindow's makeKeyAndOrderFront_(null)
+    end showMainWindow_
     
     -- Bound to Quit menu item
     on quit_(sender)
-		quit
-	end quit_
+        quit
+    end quit_
 
     -- Bound to Auto radio buttons and Manual text field in Prefs window
     on useManualMethod_(sender)
@@ -598,11 +691,14 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             set my isHidden to false
             set my isManualEnabled to false
             set my selectedMethod to 0
-            set my expireAge to 0
+            set my expireAge to ""
+            set my expireDateUnix to 0
             set my manualExpireDays to ""
             tell defaults to removeObjectForKey_("expireAge")
+            tell defaults to removeObjectForKey_("expireDateUnix")
             tell defaults to setObject_forKey_(0, "selectedMethod")
-            tell defaults to setObject_forKey_(0, "expireAge")
+            tell defaults to setObject_forKey_("", "expireAge")
+            tell defaults to setObject_forKey_(0, "expireDateUnix")
             doKerbCheck_(me)
         end if
     end useManualMethod_
@@ -638,12 +734,14 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         end if
     end toggleKerbMinder_
 
--- Bound to Revert button in Prefs window (REMOVE ON RELEASE)
+    -- Bound to Revert button in Prefs window (REMOVE ON RELEASE)
     on revertDefaults_(sender)
         tell defaults to removeObjectForKey_("menu_title")
         tell defaults to removeObjectForKey_("tooltip")
         tell defaults to removeObjectForKey_("selectedMethod")
+        tell defaults to removeObjectForKey_("enableNotifications")
         tell defaults to removeObjectForKey_("expireAge")
+        tell defaults to removeObjectForKey_("expireDateUnix")
         tell defaults to removeObjectForKey_("pwdSetDate")
         tell defaults to removeObjectForKey_("warningDays")
         tell defaults to removeObjectForKey_("prefsLocked")
@@ -665,22 +763,22 @@ Please choose your configuration options."
     on createMenu_(sender)
         set statusMenu to (my NSMenu's alloc)'s initWithTitle_("statusMenu")
         statusMenu's setAutoenablesItems_(false)
-		set menuItem to (my NSMenuItem's alloc)'s init
-		menuItem's setTitle_("About ADPassMon…")
-		menuItem's setTarget_(me)
-		menuItem's setAction_("about:")
-		menuItem's setEnabled_(true)
-		statusMenu's addItem_(menuItem)
-		menuItem's release()
-        
-		set menuItem to (my NSMenuItem's alloc)'s init
+        set menuItem to (my NSMenuItem's alloc)'s init
+        menuItem's setTitle_("About ADPassMon…")
+        menuItem's setTarget_(me)
+        menuItem's setAction_("about:")
+        menuItem's setEnabled_(true)
+        statusMenu's addItem_(menuItem)
+        menuItem's release()
+
+        set menuItem to (my NSMenuItem's alloc)'s init
         menuItem's setTitle_("Use Notifications")
-		menuItem's setTarget_(me)
-		menuItem's setAction_("toggleNotify:")
+        menuItem's setTarget_(me)
+        menuItem's setAction_("toggleNotify:")
         menuItem's setEnabled_(true)
         menuItem's setState_(enableNotifications)
         statusMenu's addItem_(menuItem)
-		menuItem's release()
+        menuItem's release()
         
         set menuItem to (my NSMenuItem's alloc)'s init
         menuItem's setTitle_("Use KerbMinder")
@@ -700,58 +798,58 @@ Please choose your configuration options."
         statusMenu's addItem_(menuItem)
         menuItem's release()
         
-		statusMenu's addItem_(my NSMenuItem's separatorItem)
+        statusMenu's addItem_(my NSMenuItem's separatorItem)
 		
-		set menuItem to (my NSMenuItem's alloc)'s init
-		menuItem's setTitle_("Refresh Kerberos Ticket")
-		menuItem's setTarget_(me)
-		menuItem's setAction_("doKerbCheck:")
-		menuItem's setEnabled_(not skipKerb)
-		statusMenu's addItem_(menuItem)
-		menuItem's release()
+        set menuItem to (my NSMenuItem's alloc)'s init
+        menuItem's setTitle_("Refresh Kerberos Ticket")
+        menuItem's setTarget_(me)
+        menuItem's setAction_("doKerbCheck:")
+        menuItem's setEnabled_(onDomain)
+        statusMenu's addItem_(menuItem)
+        menuItem's release()
         
-		set menuItem to (my NSMenuItem's alloc)'s init
-		menuItem's setTitle_("Launch Ticket Viewer")
-		menuItem's setTarget_(me)
-		menuItem's setAction_("ticketViewer:")
-		menuItem's setEnabled_(true)
-		statusMenu's addItem_(menuItem)
-		menuItem's release()
+        set menuItem to (my NSMenuItem's alloc)'s init
+        menuItem's setTitle_("Launch Ticket Viewer")
+        menuItem's setTarget_(me)
+        menuItem's setAction_("ticketViewer:")
+        menuItem's setEnabled_(true)
+        statusMenu's addItem_(menuItem)
+        menuItem's release()
         
-		set menuItem to (my NSMenuItem's alloc)'s init
-		menuItem's setTitle_("Re-check Expiration")
-		menuItem's setTarget_(me)
-		menuItem's setAction_("doProcess:")
-		menuItem's setEnabled_(true)
-		statusMenu's addItem_(menuItem)
-		menuItem's release()
+        set menuItem to (my NSMenuItem's alloc)'s init
+        menuItem's setTitle_("Re-check Expiration")
+        menuItem's setTarget_(me)
+        menuItem's setAction_("doProcess:")
+        menuItem's setEnabled_(true)
+        statusMenu's addItem_(menuItem)
+        menuItem's release()
+
+        set menuItem to (my NSMenuItem's alloc)'s init
+        menuItem's setTitle_("Change Password…")
+        menuItem's setTarget_(me)
+        menuItem's setAction_("changePassword:")
+        menuItem's setEnabled_(onDomain)
+        statusMenu's addItem_(menuItem)
+        menuItem's release()
         
-		set menuItem to (my NSMenuItem's alloc)'s init
-		menuItem's setTitle_("Change Password…")
-		menuItem's setTarget_(me)
-		menuItem's setAction_("changePassword:")
-		menuItem's setEnabled_(not skipKerb)
-		statusMenu's addItem_(menuItem)
-		menuItem's release()
-        
-		statusMenu's addItem_(my NSMenuItem's separatorItem)
+        statusMenu's addItem_(my NSMenuItem's separatorItem)
 		
-		set menuItem to (my NSMenuItem's alloc)'s init
-		menuItem's setTitle_("Exit")
-		menuItem's setTarget_(me)
-		menuItem's setAction_("quit:")
-		menuItem's setEnabled_(true)
-		statusMenu's addItem_(menuItem)
-		menuItem's release()
+        set menuItem to (my NSMenuItem's alloc)'s init
+        menuItem's setTitle_("Exit")
+        menuItem's setTarget_(me)
+        menuItem's setAction_("quit:")
+        menuItem's setEnabled_(true)
+        statusMenu's addItem_(menuItem)
+        menuItem's release()
         
-		-- Instantiate the statusItemController object and set it to use the statusMenu we just created
-		set statusMenuController to (current application's class "StatusMenuController"'s alloc)'s init
-		statusMenuController's createStatusItemWithMenu_(statusMenu)
-		statusMenu's release()
+        -- Instantiate the statusItemController object and set it to use the statusMenu we just created
+        set statusMenuController to (current application's class "StatusMenuController"'s alloc)'s init
+        statusMenuController's createStatusItemWithMenu_(statusMenu)
+        statusMenu's release()
     end createMenu_
     
     -- Do processes necessary for app initiation
-	on applicationWillFinishLaunching_(aNotification)
+    on applicationWillFinishLaunching_(aNotification)
         getOS_(me)
         regDefaults_(me) -- populate plist file with defaults (will not overwrite non-default settings))
         accTest_(me)
@@ -759,15 +857,19 @@ Please choose your configuration options."
         notifySetup_(me)
         retrieveDefaults_(me)
         createMenu_(me)
+        domainTest_(me)
+        if my onDomain is false then
+            return
+        end if
         canPassExpire_(me)
         if passExpires then
-            if my expireAge = 0 and my selectedMethod = 0 then -- if we're using Auto and we don't have the password expiration age, check for kerberos ticket
+            -- if we're using Auto and we don't have the password expiration age, check for kerberos ticket
+            if my expireDateUnix = 0 and my selectedMethod = 0 then
                 doKerbCheck_(me)
                 if prefsLocked as integer is equal to 0 then -- only display the window if Prefs are not locked
-                    log "in the loop"
+                    log "First launch, waiting for settings..."
                     theWindow's makeKeyAndOrderFront_(null) -- open the prefs window when running for first (assumption?) time
-                    set my theMessage to "Welcome!
-Please choose your configuration options."
+                    set my theMessage to "Welcome!\nPlease choose your configuration options."
                 end if
             else if my selectedMethod is 1 then
                 set my manualExpireDays to expireAge
@@ -785,6 +887,9 @@ Please choose your configuration options."
         
             -- Set a timer to trigger doProcess handler every 12 hrs and spawn notifications (if enabled).
             NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(43200, me, "doProcess:", missing value, true)
+            
+            -- Set a timer to check for domain connectivity every minute.
+            NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(60, me, "domainTest:", missing value, true)
         else
             log "Password does not exipire. Stopping."
             updateMenuTitle_("[--]", "Your password does not expire.")
@@ -792,13 +897,13 @@ Please choose your configuration options."
         end if
     end applicationWillFinishLaunching_
     
-	on applicationShouldTerminate_(sender)
-		return current application's NSTerminateNow
-	end applicationShouldTerminate_
+    on applicationShouldTerminate_(sender)
+        return current application's NSTerminateNow
+    end applicationShouldTerminate_
 
     -- This will immediately release the space in the menubar on quit
     on applicationWillTerminate_(notification)
         statusMenuController's releaseStatusItem()
-		statusMenuController's release()
+        statusMenuController's release()
     end applicationWillTerminate_
 end script

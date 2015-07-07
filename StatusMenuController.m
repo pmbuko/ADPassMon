@@ -1,9 +1,9 @@
 //
-//  StatusMenu.m
+//  StatusMenuController.m
 //  ADPassMon
 //
 //  Created by Peter Bukowinski on 3/24/11.
-//  Copyright 2014 Peter Bukowinski. All rights reserved.
+//  Copyright (C) 2015 Peter Bukowinski. All rights reserved.
 //
 // I feel it is important to give credit for portions of this code, attributed below.
 //
