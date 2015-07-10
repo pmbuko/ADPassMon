@@ -38,6 +38,7 @@ script ADPassMonAppDelegate
 --- Classes
     property parent : class "NSObject"
     property NSMenu : class "NSMenu"
+    property NSThread : class "NSThread" -- for 'sleep'-like feature
     property NSMenuItem : class "NSMenuItem"
     property NSTimer : class "NSTimer" -- so we can do stuff at regular intervals
     property NSWorkspace : class "NSWorkspace" -- for sleep notification
@@ -261,7 +262,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     -- Trigger doProcess handler on wake from sleep
     on watchForWake_(sender)
         tell (NSWorkspace's sharedWorkspace())'s notificationCenter() to ¬
-            addObserver_selector_name_object_(me, "doProcess:", "NSWorkspaceDidWakeNotification", missing value)
+            addObserver_selector_name_object_(me, "doProcessWithWait:", "NSWorkspaceDidWakeNotification", missing value)
     end watchForWake_
 
     on ticketViewer_(sender)
@@ -625,6 +626,11 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             errorOut_(theError, 1)
         end try
     end doProcess_
+    
+    on doProcessWithWait_(sender)
+        tell current application's NSThread to sleepForTimeInterval_(15)
+        doProcess_(me)
+    end doProcessWithWait_
 
 --- INTERFACE BINDING HANDLERS ---
 
