@@ -72,7 +72,7 @@ script ADPassMonAppDelegate
     property KerbMinderInstalled : false
     
 --- Other Properties
-    property mavAccTest : 1
+    property accTest : 1
     property tooltip : "Waiting for data…"
     property osVersion : ""
     property kerb : ""
@@ -124,8 +124,8 @@ script ADPassMonAppDelegate
                 accEnable_(me)
             end if
         else -- if we're running 10.9 or later, Accessibility is handled differently
-            tell defaults to set my mavAccTest to objectForKey_("mavAccTest")
-            if mavAccTest as integer is 1 then
+            tell defaults to set my accTest to objectForKey_("accTest")
+            if accTest as integer is 1 then
                 if "80" is in (do shell script "/usr/bin/id -G") then -- checks if user is in admin group
                     set accessDialog to (display dialog "ADPassMon's \"Change Password\" feature requires assistive access to open the password panel.
                     
@@ -139,15 +139,21 @@ Enable it now? (requires password)" with icon 2 buttons {"No", "Yes"} default bu
                             log "  Not enabled"
                             try
                                 do shell script "sqlite3 '/Library/Application Support/com.apple.TCC/TCC.db' \"INSERT INTO access VALUES('kTCCServiceAccessibility','org.pmbuko.ADPassMon',0,1,1,NULL);\"" with administrator privileges
-                                set my mavAccTest to 0
-                                tell defaults to setObject_forKey_(0, "mavAccTest")
+                                set my accTest to 0
+                                tell defaults to setObject_forKey_(0, "accTest")
                             on error theError
                                 log "Unable to set access. Error: " & theError
                             end try
                         else
+                            set my accTest to 0
+                            tell defaults to setObject_forKey_(0, "accTest")
                             log "  Enabled"
                         end if
                     end if
+                else
+                    set my accTest to 0
+                    tell defaults to setObject_forKey_(0, "accTest")
+                    log "  User not admin. Skipping."
                 end if
             else
                 log "  Enabled"
@@ -211,7 +217,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                                             myLDAP:myLDAP, ¬
                                             pwPolicy:pwPolicy, ¬
                                             pwPolicyButton:pwPolicyButton, ¬
-                                            mavAccTest:mavAccTest, ¬
+                                            accTest:accTest, ¬
                                             enableKerbMinder:enableKerbMinder, ¬
                                             launchAtLogin:launchAtLogin})
     end regDefaults_
@@ -230,7 +236,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to set my myLDAP to objectForKey_("myLDAP")
         tell defaults to set my pwPolicy to objectForKey_("pwPolicy")
         tell defaults to set my pwPolicyButton to objectForKey_("pwPolicyButton")
-        tell defaults to set my mavAccTest to objectForKey_("mavAccTest")
+        tell defaults to set my accTest to objectForKey_("accTest")
         tell defaults to set my enableKerbMinder to objectForKey_("enableKerbMinder")
         tell defaults to set my launchAtLogin to objectForKey_("launchAtLogin")
     end retrieveDefaults_
@@ -760,7 +766,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to removeObjectForKey_("myLDAP")
         tell defaults to removeObjectForKey_("pwPolicy")
         tell defaults to removeObjectForKey_("pwPolicyButton")
-        tell defaults to removeObjectForKey_("mavAccTest")
+        tell defaults to removeObjectForKey_("accTest")
         tell defaults to removeObjectForKey_("enableKerbMinder")
         do shell script "defaults delete org.pmbuko.ADPassMon"
         retrieveDefaults_(me)
