@@ -125,7 +125,7 @@ script ADPassMonAppDelegate
             end if
         else -- if we're running 10.9 or later, Accessibility is handled differently
             tell defaults to set my mavAccTest to objectForKey_("mavAccTest")
-            if mavAccTest is 1 then
+            if mavAccTest as integer is 1 then
                 if "80" is in (do shell script "/usr/bin/id -G") then -- checks if user is in admin group
                     set accessDialog to (display dialog "ADPassMon's \"Change Password\" feature requires assistive access to open the password panel.
                     
@@ -149,7 +149,10 @@ Enable it now? (requires password)" with icon 2 buttons {"No", "Yes"} default bu
                         end if
                     end if
                 end if
+            else
+                log "  Enabled"
             end if
+            
         end if
     end accTest_
 
@@ -215,6 +218,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
 
     -- Get values from plist
     on retrieveDefaults_(sender)
+        log "Loading prefs..."
         tell defaults to set my selectedMethod to objectForKey_("selectedMethod") as integer
         tell defaults to set my isManualEnabled to objectForKey_("isManualEnabled") as integer
         tell defaults to set my enableNotifications to objectForKey_("enableNotifications") as integer
@@ -656,10 +660,12 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                 tell application "System Events"
                     tell application process "System Preferences"
                         if my osVersion is less than or equal to 6 then
+                            tell current application's NSThread to sleepForTimeInterval_(1)
                             click radio button "Password" of tab group 1 of window "Accounts"
                             click button "Change Password…" of tab group 1 of window "Accounts"
                         end if
                         if my osVersion is greater than 6 then
+                            tell current application's NSThread to sleepForTimeInterval_(1)
                             click radio button "Password" of tab group 1 of window "Users & Groups"
                             click button "Change Password…" of tab group 1 of window "Users & Groups"
                         end if
