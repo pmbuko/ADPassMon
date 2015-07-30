@@ -610,7 +610,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                 else
                     log "  Found expireDateUnix in plist: " & expireDateUnix
                     easyMethod_(me)
-                end ifsss
+                end if
 
                 if my goEasy is true and my selectedMethod = 0 then
                     log "  Using msDS method"
