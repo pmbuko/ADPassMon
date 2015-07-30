@@ -52,11 +52,12 @@ script ADPassMonAppDelegate
     property theMessage : missing value -- for stats display in pref window
     property manualExpireDays : missing value
     property selectedMethod : missing value
-    property warningDays : missing value
+    property warningDays : 14
     property thePassword : missing value
     property toggleNotifyButton : missing value
 
 --- Booleans
+    property first_run : true
     property isIdle : true
     property isHidden : false
     property isManualEnabled : false
@@ -72,19 +73,20 @@ script ADPassMonAppDelegate
     property KerbMinderInstalled : false
     
 --- Other Properties
+    property menu_title : "[ ? ]"
     property accTest : 1
     property tooltip : "Waiting for data…"
     property osVersion : ""
     property kerb : ""
     property myLDAP : ""
     property mySearchBase : ""
-    property expireAge : ""
+    property expireAge : "0"
     property expireAgeUnix : ""
     property expireDate: ""
     property expireDateUnix: ""
     property uAC : ""
     property pwdSetDate : ""
-    property pwdSetDateUnix : ""
+    property pwdSetDateUnix : 0
     property plistPwdSetDate : 0
     property pwPolicy : ""
     property pwPolicyButton : "OK"
@@ -204,15 +206,16 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     -- Register plist default settings
     on regDefaults_(sender)
         tell current application's NSUserDefaults to set defaults to standardUserDefaults()
-        tell defaults to registerDefaults_({menu_title:"[ ? ]", ¬
+        tell defaults to registerDefaults_({menu_title: "[ ? ]", ¬
                                             tooltip:tooltip, ¬
+                                            fist_run:first_run, ¬
                                             selectedMethod:0, ¬
                                             isManualEnabled:isManualEnabled, ¬
                                             enableNotifications:enableNotifications, ¬
                                             expireAge:expireAge, ¬
-                                            expireDateUnix:0, ¬
-                                            pwdSetDate:0, ¬
-                                            warningDays:14, ¬
+                                            expireDateUnix:expireDateUnix, ¬
+                                            pwdSetDate:pwdSetDate, ¬
+                                            warningDays:warningDays, ¬
                                             prefsLocked:prefsLocked, ¬
                                             myLDAP:myLDAP, ¬
                                             pwPolicy:pwPolicy, ¬
@@ -224,7 +227,8 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
 
     -- Get values from plist
     on retrieveDefaults_(sender)
-        log "Loading prefs..."
+        tell defaults to set my menu_title to objectForKey_("menu_title")
+        tell defaults to set my first_run to objectForKey_("first_run")
         tell defaults to set my selectedMethod to objectForKey_("selectedMethod") as integer
         tell defaults to set my isManualEnabled to objectForKey_("isManualEnabled") as integer
         tell defaults to set my enableNotifications to objectForKey_("enableNotifications") as integer
@@ -236,7 +240,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to set my myLDAP to objectForKey_("myLDAP")
         tell defaults to set my pwPolicy to objectForKey_("pwPolicy")
         tell defaults to set my pwPolicyButton to objectForKey_("pwPolicyButton")
-        tell defaults to set my accTest to objectForKey_("accTest")
+        tell defaults to set my accTest to objectForKey_("accTest") as integer
         tell defaults to set my enableKerbMinder to objectForKey_("enableKerbMinder")
         tell defaults to set my launchAtLogin to objectForKey_("launchAtLogin")
     end retrieveDefaults_
@@ -337,8 +341,6 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                     on error theError
                         set my theMessage to "Kerberos ticket expired or not found"
                         log "  No ticket found"
-                        --updateMenuTitle_("[ ! ]", "Kerberos ticket expired or not found")
-                        -- offer to renew Kerberos ticket
                         activate
                         set response to (display dialog "No Kerberos ticket for Active Directory was found. Do you want to renew it?" with icon 1 buttons {"No","Yes"} default button "Yes")
                         if button returned of response is "Yes" then
@@ -374,8 +376,6 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         on error theError
             set my theMessage to "Kerberos ticket expired or not found"
             log "  No ticket found"
-            --updateMenuTitle_("[ ! ]", "Kerberos ticket expired or not found")
-            -- offer to renew Kerberos ticket
             activate
             set response to (display dialog "No Kerberos ticket for Active Directory was found. Do you want to renew it?" with icon 2 buttons {"No","Yes"} default button "Yes")
             if button returned of response is "Yes" then
@@ -609,9 +609,9 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                     end if
                 else
                     log "  Found expireDateUnix in plist: " & expireDateUnix
-                end if
+                    easyMethod_(me)
+                end ifsss
 
-                easyMethod_(me)
                 if my goEasy is true and my selectedMethod = 0 then
                     log "  Using msDS method"
                     easyDate_(expireDateUnix)
@@ -622,7 +622,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                     getExpirationDate_(daysUntilExp)
                 end if
                 
-                updateMenuTitle_("[" & daysUntilExpNice & "d]", "Your password expires\n" & expirationDate)
+                updateMenuTitle_((daysUntilExpNice as string) & "d", "Your password expires\n" & expirationDate)
                 
                 set my theMessage to "Your password expires in " & daysUntilExpNice & " days\non " & expirationDate
                 set my isIdle to true
@@ -752,9 +752,10 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         end if
     end toggleKerbMinder_
 
-    -- Bound to Revert button in Prefs window (REMOVE ON RELEASE)
+    -- Bound to Revert button in Prefs window
     on revertDefaults_(sender)
         tell defaults to removeObjectForKey_("menu_title")
+        tell defaults to removeObjectForKey_("first_run")
         tell defaults to removeObjectForKey_("tooltip")
         tell defaults to removeObjectForKey_("selectedMethod")
         tell defaults to removeObjectForKey_("enableNotifications")
@@ -781,6 +782,7 @@ Please choose your configuration options."
     on createMenu_(sender)
         set statusMenu to (my NSMenu's alloc)'s initWithTitle_("statusMenu")
         statusMenu's setAutoenablesItems_(false)
+        
         set menuItem to (my NSMenuItem's alloc)'s init
         menuItem's setTitle_("About ADPassMon…")
         menuItem's setTarget_(me)
@@ -794,7 +796,7 @@ Please choose your configuration options."
         menuItem's setTarget_(me)
         menuItem's setAction_("toggleNotify:")
         menuItem's setEnabled_(true)
-        menuItem's setState_(enableNotifications)
+        menuItem's setState_(enableNotifications as integer)
         statusMenu's addItem_(menuItem)
         menuItem's release()
         
@@ -804,7 +806,7 @@ Please choose your configuration options."
         menuItem's setAction_("toggleKerbMinder:")
         menuItem's setEnabled_(true)
         menuItem's setHidden_(not KerbMinderInstalled)
-        menuItem's setState_(enableKerbMinder)
+        menuItem's setState_(enableKerbMinder as integer)
         statusMenu's addItem_(menuItem)
         menuItem's release()
         
@@ -822,7 +824,7 @@ Please choose your configuration options."
         menuItem's setTitle_("Refresh Kerberos Ticket")
         menuItem's setTarget_(me)
         menuItem's setAction_("doKerbCheck:")
-        menuItem's setEnabled_(onDomain)
+        menuItem's setEnabled_(onDomain as boolean)
         statusMenu's addItem_(menuItem)
         menuItem's release()
         
@@ -846,7 +848,7 @@ Please choose your configuration options."
         menuItem's setTitle_("Change Password…")
         menuItem's setTarget_(me)
         menuItem's setAction_("changePassword:")
-        menuItem's setEnabled_(onDomain)
+        menuItem's setEnabled_(onDomain as boolean)
         statusMenu's addItem_(menuItem)
         menuItem's release()
         
@@ -873,21 +875,24 @@ Please choose your configuration options."
         accTest_(me)
         KerbMinderTest_(me)
         notifySetup_(me)
-        retrieveDefaults_(me)
-        createMenu_(me)
-        domainTest_(me)
+        retrieveDefaults_(me) -- load defaults
+        createMenu_(me)  -- build and display the status menu item
+        domainTest_(me)  -- test domain connectivity
         if my onDomain is false then
-            return
+            return  -- stop the process if no domain connectivity
         end if
         canPassExpire_(me)
         if passExpires then
             -- if we're using Auto and we don't have the password expiration age, check for kerberos ticket
             if my expireDateUnix = 0 and my selectedMethod = 0 then
                 doKerbCheck_(me)
-                if prefsLocked as integer is equal to 0 then -- only display the window if Prefs are not locked
-                    log "First launch, waiting for settings..."
-                    theWindow's makeKeyAndOrderFront_(null) -- open the prefs window when running for first (assumption?) time
-                    set my theMessage to "Welcome!\nPlease choose your configuration options."
+                if first_run then -- only display prefs window if running for first time
+                    if prefsLocked as integer is equal to 0 then -- only display the window if prefs are not locked
+                        log "First launch, waiting for settings..."
+                        theWindow's makeKeyAndOrderFront_(null)
+                        set my theMessage to "Welcome!\nPlease choose your configuration options."
+                        set first_run to false
+                    end if
                 end if
             else if my selectedMethod is 1 then
                 set my manualExpireDays to expireAge
