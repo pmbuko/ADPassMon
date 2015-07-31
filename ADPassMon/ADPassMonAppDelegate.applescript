@@ -36,66 +36,67 @@ script ADPassMonAppDelegate
 --- PROPERTIES ---    
 
 --- Classes
-    property parent : class "NSObject"
-    property NSMenu : class "NSMenu"
-    property NSThread : class "NSThread" -- for 'sleep'-like feature
-    property NSMenuItem : class "NSMenuItem"
-    property NSTimer : class "NSTimer" -- so we can do stuff at regular intervals
-    property NSWorkspace : class "NSWorkspace" -- for sleep notification
+    property parent :                   class "NSObject"
+    property NSMenu :                   class "NSMenu"
+    property NSThread :                 class "NSThread" -- for 'sleep'-like feature
+    property NSMenuItem :               class "NSMenuItem"
+    property NSTimer :                  class "NSTimer" -- so we can do stuff at regular intervals
+    property NSUserNotificationCenter : class "NSUserNotificationCenter" -- for notification center
+    property NSWorkspace :              class "NSWorkspace" -- for sleep notification
 
 --- Objects
     property standardUserDefaults : missing value
-    property statusMenu : missing value
+    property statusMenu :           missing value
     property statusMenuController : missing value
-    property theWindow : missing value
-    property defaults : missing value -- for saved prefs
-    property theMessage : missing value -- for stats display in pref window
-    property manualExpireDays : missing value
-    property selectedMethod : missing value
-    property warningDays : 14
-    property thePassword : missing value
-    property toggleNotifyButton : missing value
+    property theWindow :            missing value
+    property defaults :             missing value -- for saved prefs
+    property theMessage :           missing value -- for stats display in pref window
+    property manualExpireDays :     missing value
+    property selectedMethod :       missing value
+    property warningDays :          14
+    property thePassword :          missing value
+    property toggleNotifyButton :   missing value
 
 --- Booleans
-    property first_run : true
-    property isIdle : true
-    property isHidden : false
-    property isManualEnabled : false
-    property enableNotifications : true
-    property enableKerbMinder : false
-    property prefsLocked : false
-    property launchAtLogin : false
-    property skipKerb : false
-    property onDomain : false
-    property passExpires : true
-    property goEasy : false
-    property showChangePass : false
-    property KerbMinderInstalled : false
+    property first_run :            true
+    property isIdle :               true
+    property isHidden :             false
+    property isManualEnabled :      false
+    property enableNotifications :  true
+    property enableKerbMinder :     false
+    property prefsLocked :          false
+    property launchAtLogin :        false
+    property skipKerb :             false
+    property onDomain :             false
+    property passExpires :          true
+    property goEasy :               false
+    property showChangePass :       false
+    property KerbMinderInstalled :  false
     
 --- Other Properties
-    property menu_title : "[ ? ]"
-    property accTest : 1
-    property tooltip : "Waiting for data…"
-    property osVersion : ""
-    property kerb : ""
-    property myLDAP : ""
-    property mySearchBase : ""
-    property expireAge : "0"
-    property expireAgeUnix : ""
-    property expireDate: ""
-    property expireDateUnix: ""
-    property uAC : ""
-    property pwdSetDate : ""
-    property pwdSetDateUnix : 0
-    property plistPwdSetDate : 0
-    property pwPolicy : ""
-    property pwPolicyButton : "OK"
-    property today : ""
-    property todayUnix : ""
-    property daysUntilExp : ""
+    property menu_title :       "[ ? ]"
+    property accTest :          1
+    property tooltip :          "Waiting for data…"
+    property osVersion :        ""
+    property kerb :             ""
+    property myLDAP :           ""
+    property mySearchBase :     ""
+    property expireAge :        0
+    property expireAgeUnix :    ""
+    property expireDate:        ""
+    property expireDateUnix:    ""
+    property uAC :              ""
+    property pwdSetDate :       ""
+    property pwdSetDateUnix :   0
+    property plistPwdSetDate :  0
+    property pwPolicy :         ""
+    property pwPolicyButton :   "OK"
+    property today :            ""
+    property todayUnix :        ""
+    property daysUntilExp :     ""
     property daysUntilExpNice : ""
-    property expirationDate : ""
-    property mavAccStatus : ""
+    property expirationDate :   ""
+    property mavAccStatus :     ""
 
 --- HANDLERS ---
 
@@ -257,7 +258,8 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     on doNotify_(sender)
         if sender as integer ≤ my warningDays as integer then
             if osVersion is greater than 7 then
-                if my enableNotifications is true then
+                if my enableNotifications as boolean is true then
+                    log "Triggering notification…"
                     set ncTitle to "Password Expiration Warning"
                     set ncMessage to "Your password will expire in " & sender & " days on " & expirationDate
                     sendNotificationWithTitleAndMessage_(ncTitle, ncMessage)
