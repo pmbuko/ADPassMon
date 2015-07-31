@@ -1,8 +1,8 @@
---
 --  ADPassMonAppDelegate.applescript
 --  ADPassMon
 --
---  Created by Peter Bukowinski on 3/24/11.
+--  Created by Peter Bukowinski on 3/24/11 (and updated many times since)
+--
 --  This software is released under the terms of the MIT license.
 --  Copyright (C) 2015 by Peter Bukowinski
 --
@@ -23,13 +23,11 @@
 --  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 --  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 --  THE SOFTWARE.
---
+---------------------------------------------------------------------------------
 -- TO DO:
--- - possibly revise getSearchBase handler (#344) to only use the last two "DC=" pieces. Comment in handler
--- - Disable "Change Password" menu item when off domain network
 --
 -- FEATURE REQUESTS:
--- - enable mcx defaults hook for adding as login item.
+-- - Enable mcx defaults hook for adding as login item.
 
 script ADPassMonAppDelegate
 
@@ -53,7 +51,6 @@ script ADPassMonAppDelegate
     property theMessage :           missing value -- for stats display in pref window
     property manualExpireDays :     missing value
     property selectedMethod :       missing value
-    property warningDays :          14
     property thePassword :          missing value
     property toggleNotifyButton :   missing value
 
@@ -74,6 +71,7 @@ script ADPassMonAppDelegate
     property KerbMinderInstalled :  false
     
 --- Other Properties
+    property warningDays :      14
     property menu_title :       "[ ? ]"
     property accTest :          1
     property tooltip :          "Waiting for data…"
@@ -249,8 +247,8 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     on notifySetup_(sender)
         if osVersion is less than 8 then
             set my enableNotifications to false
-        else
-            set my enableNotifications to true
+        --else
+        --  set my enableNotifications to true
         end if
     end notifySetup_
 
@@ -547,7 +545,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         set my daysUntilExp to ((timestamp - todayUnix) / 86400)
         log "    daysUntilExp: " & daysUntilExp
         set my daysUntilExpNice to round daysUntilExp rounding toward zero
-        log "    daysUntilExpNice: " & daysUntilExpNice
+        --log "    daysUntilExpNice: " & daysUntilExpNice
     end easyDate_
     
 
@@ -565,7 +563,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             set my daysUntilExp to fmt's stringFromNumber_(expireAge - (today - pwdSetDate)) as real -- removed 'as integer' to avoid rounding issue
             log "  daysUntilExp: " & daysUntilExp
             set my daysUntilExpNice to round daysUntilExp rounding toward zero
-            log "  daysUntilExpNice: " & daysUntilExpNice
+            --log "  daysUntilExpNice: " & daysUntilExpNice
         on error theError
             errorOut_(theError, 1)
         end try
@@ -731,26 +729,30 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
 
     -- Bound to Notify items in menu and Prefs window
     on toggleNotify_(sender)
-        if my enableNotifications is true then
+        if my enableNotifications as boolean is true then
             set my enableNotifications to false
-            tell defaults to setObject_forKey_(enableNotifications, "enableNotifications")
             my statusMenu's itemWithTitle_("Use Notifications")'s setState_(0)
+            tell defaults to setObject_forKey_(enableNotifications, "enableNotifications")
+            log "Disabled notifications."
         else
             set my enableNotifications to true
-            tell defaults to setObject_forKey_(enableNotifications, "enableNotifications")
             my statusMenu's itemWithTitle_("Use Notifications")'s setState_(1)
+            tell defaults to setObject_forKey_(enableNotifications, "enableNotifications")
+            log "Enabled notifications."
         end if
     end toggleNotify_
     
     on toggleKerbMinder_(sender)
-        if my enableKerbMinder is true then
+        if my enableKerbMinder as boolean is true then
             set my enableKerbMinder to false
-            tell defaults to setObject_forKey_(enableKerbMinder, "enableKerbMinder")
             my statusMenu's itemWithTitle_("Use KerbMinder")'s setState_(0)
+            tell defaults to setObject_forKey_(enableKerbMinder, "enableKerbMinder")
+            log "Disabled KerbMinder."
         else
             set my enableKerbMinder to true
-            tell defaults to setObject_forKey_(enableKerbMinder, "enableKerbMinder")
             my statusMenu's itemWithTitle_("Use KerbMinder")'s setState_(1)
+            tell defaults to setObject_forKey_(enableKerbMinder, "enableKerbMinder")
+            log "Enabled KerbMinder."
         end if
     end toggleKerbMinder_
 

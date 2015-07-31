@@ -132,13 +132,7 @@
                                             </buttonCell>
                                             <connections>
                                                 <action selector="toggleNotify:" target="494" id="U20-fI-qYi"/>
-                                                <binding destination="676" name="value" keyPath="values.enableNotifications" id="EYM-Xg-uNU">
-                                                    <dictionary key="options">
-                                                        <bool key="NSAllowsEditingMultipleValuesSelection" value="NO"/>
-                                                        <bool key="NSConditionallySetsEnabled" value="NO"/>
-                                                        <bool key="NSRaisesForNotApplicableKeys" value="NO"/>
-                                                    </dictionary>
-                                                </binding>
+                                                <binding destination="676" name="value" keyPath="values.enableNotifications" id="MXG-Lu-E7u"/>
                                             </connections>
                                         </button>
                                         <textField verticalHuggingPriority="750" id="944">
