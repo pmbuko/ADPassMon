@@ -408,11 +408,20 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         end try
     end renewLionKerb_
 
-    -- Use scutil to get AD DNS info
+    -- ad node with scutil fallback to get AD DNS info
     on getDNS_(sender)
         try
-            -- "first word of" added for 10.7 compatibility, which may return more than one item
-            set my myLDAP to first word of (do shell script "/usr/sbin/scutil --dns | /usr/bin/awk '/nameserver\\[0\\]/{print $3}'") as text
+            -- find source of user node
+            set originalNodeName to (do shell script "/usr/bin/dscl localhost read /Search/Users/$USER OriginalNodeName | grep -o -e '/.*'") as text
+            if (count words of originalNodeName) > 0
+                set my myLDAP to (do shell script "/usr/bin/dscl localhost read '" & originalNodeName & "' ServerConnection | /usr/bin/awk '/ServerConnection/{print $2}'") as text
+                set my mySearchBase to (do shell script "/usr/bin/dscl localhost read '" & originalNodeName & "' LDAPSearchBaseSuffix | /usr/bin/awk '/LDAPSearchBaseSuffix/{print $2}'") as text
+            end if
+        
+            if (count words of myLDAP) = 0
+                -- "first word of" added for 10.7 compatibility, which may return more than one item
+                set my myLDAP to first word of (do shell script "/usr/sbin/scutil --dns | /usr/bin/awk '/nameserver\\[0\\]/{print $3}'") as text
+            end if
         on error theError
             errorOut_(theError)
         end try
@@ -445,8 +454,12 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         end try
     end getADLDAP_
 
-    -- Use ldapsearch to get search base
+    -- Use ldapsearch to get search base if OriginalNodeName method didn't work
     on getSearchBase_(sender)
+        if (count of words of my mySearchBase) > 0
+            return
+        end if
+
         try
             set my mySearchBase to (do shell script "/usr/bin/ldapsearch -LLL -Q -s base -H ldap://" & myLDAP & " defaultNamingContext | /usr/bin/awk '/defaultNamingContext/{print $2}'") as text
                 -- awk -F, '/rootDomainNamingContext/{print $(NF-1)","$NF}' to take only last two search base fields
