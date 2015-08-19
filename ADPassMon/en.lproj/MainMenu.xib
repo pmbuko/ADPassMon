@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="7706" systemVersion="14E46" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="7706" systemVersion="14F27" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="7706"/>
@@ -15,14 +15,14 @@
         <window title="ADPassMon Preferences" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="371">
             <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES"/>
-            <rect key="contentRect" x="862" y="600" width="369" height="331"/>
+            <rect key="contentRect" x="862" y="600" width="369" height="358"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1178"/>
             <view key="contentView" id="372">
-                <rect key="frame" x="0.0" y="0.0" width="369" height="331"/>
+                <rect key="frame" x="0.0" y="5" width="369" height="358"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <textField verticalHuggingPriority="750" id="754">
-                        <rect key="frame" x="20" y="268" width="329" height="43"/>
+                        <rect key="frame" x="20" y="295" width="329" height="43"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" selectable="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" borderStyle="bezel" alignment="center" title="Status" placeholderString="" drawsBackground="YES" id="755">
                             <font key="font" metaFont="system"/>
@@ -34,17 +34,17 @@
                         </connections>
                     </textField>
                     <tabView id="933">
-                        <rect key="frame" x="13" y="10" width="343" height="256"/>
+                        <rect key="frame" x="13" y="10" width="343" height="283"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <font key="font" metaFont="system"/>
                         <tabViewItems>
                             <tabViewItem label="Settings" identifier="1" id="934">
                                 <view key="view" id="937">
-                                    <rect key="frame" x="10" y="33" width="323" height="210"/>
+                                    <rect key="frame" x="10" y="33" width="323" height="237"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <textField verticalHuggingPriority="750" id="938">
-                                            <rect key="frame" x="14" y="190" width="295" height="17"/>
+                                            <rect key="frame" x="14" y="217" width="295" height="17"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" title="Maximum password age discovery method:" id="959">
                                                 <font key="font" metaFont="system"/>
@@ -53,7 +53,7 @@
                                             </textFieldCell>
                                         </textField>
                                         <matrix verticalHuggingPriority="750" allowsEmptySelection="NO" id="939">
-                                            <rect key="frame" x="29" y="162" width="260" height="18"/>
+                                            <rect key="frame" x="29" y="189" width="260" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                             <size key="cellSize" width="107" height="18"/>
@@ -90,9 +90,9 @@
                                             </cells>
                                         </matrix>
                                         <textField toolTip="Enter maximum password age, in days" verticalHuggingPriority="750" id="941">
-                                            <rect key="frame" x="256" y="160" width="50" height="22"/>
+                                            <rect key="frame" x="256" y="187" width="50" height="22"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" state="on" borderStyle="bezel" placeholderString="days" drawsBackground="YES" id="953">
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="days" drawsBackground="YES" id="953">
                                                 <numberFormatter key="formatter" formatterBehavior="custom10_4" positiveFormat="#,##1.###" negativeFormat="#,##1.###" numberStyle="decimal" allowsFloats="NO" paddingCharacter="*" roundingMode="halfUp" minimumIntegerDigits="1" maximumIntegerDigits="3" maximumFractionDigits="3" decimalSeparator="." groupingSeparator="," currencyDecimalSeparator="." plusSign="+" minusSign="-" notANumberSymbol="NaN" perMillSymbol="‰" percentSymbol="%" exponentSymbol="E" positivePrefix="" positiveSuffix="" negativePrefix="-" negativeSuffix="" id="954">
                                                     <real key="multiplier" value="1"/>
                                                     <real key="roundingIncrement" value="1"/>
@@ -113,7 +113,7 @@
                                             </connections>
                                         </textField>
                                         <button toolTip="Check this to start ADPassMon automatically on each login" id="942">
-                                            <rect key="frame" x="15" y="45" width="146" height="26"/>
+                                            <rect key="frame" x="15" y="58" width="146" height="26"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="check" title="Add to Login Items" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="952">
                                                 <behavior key="behavior" pushIn="YES" changeContents="YES" lightByContents="YES"/>
@@ -124,7 +124,7 @@
                                             </connections>
                                         </button>
                                         <button toolTip="Select this to enable Growl notifications for upcoming password expiration " id="943">
-                                            <rect key="frame" x="15" y="134" width="128" height="18"/>
+                                            <rect key="frame" x="15" y="133" width="128" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="check" title="Use Notifications" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="951">
                                                 <behavior key="behavior" pushIn="YES" changeContents="YES" lightByContents="YES"/>
@@ -136,27 +136,27 @@
                                             </connections>
                                         </button>
                                         <textField verticalHuggingPriority="750" id="944">
-                                            <rect key="frame" x="41" y="77" width="209" height="51"/>
+                                            <rect key="frame" x="41" y="90" width="209" height="37"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <textFieldCell key="cell" allowsUndo="NO" sendsActionOnEndEditing="YES" title="How many days do you want to be warned before your password expires?" id="950">
+                                            <textFieldCell key="cell" allowsUndo="NO" sendsActionOnEndEditing="YES" title="How many days before expiration do you want to be notified?" id="950">
                                                 <font key="font" metaFont="system"/>
                                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <textField verticalHuggingPriority="750" id="l68-JV-PGI">
-                                            <rect key="frame" x="15" y="7" width="185" height="28"/>
+                                        <textField verticalHuggingPriority="750" id="p8b-ZQ-kHq">
+                                            <rect key="frame" x="15" y="159" width="235" height="17"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <textFieldCell key="cell" allowsUndo="NO" sendsActionOnEndEditing="YES" title="Note: Press Enter after changing Manual or Notification vaules" id="Nbq-Rb-Asb">
-                                                <font key="font" metaFont="smallSystem"/>
-                                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                            <textFieldCell key="cell" allowsUndo="NO" sendsActionOnEndEditing="YES" alignment="left" title="Expiration check interval (in hours):" id="44M-Db-JwW">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
                                         <textField verticalHuggingPriority="750" id="945">
-                                            <rect key="frame" x="256" y="91" width="50" height="22"/>
+                                            <rect key="frame" x="256" y="97" width="50" height="22"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" state="on" borderStyle="bezel" placeholderString="days" drawsBackground="YES" id="948">
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="days" drawsBackground="YES" id="948">
                                                 <numberFormatter key="formatter" formatterBehavior="custom10_4" positiveFormat="#,##1.###" negativeFormat="#,##1.###" numberStyle="decimal" allowsFloats="NO" paddingCharacter="*" roundingMode="halfUp" minimumIntegerDigits="1" maximumIntegerDigits="3" maximumFractionDigits="3" decimalSeparator="." groupingSeparator="," currencyDecimalSeparator="." plusSign="+" minusSign="-" notANumberSymbol="NaN" perMillSymbol="‰" percentSymbol="%" exponentSymbol="E" positivePrefix="" positiveSuffix="" negativePrefix="-" negativeSuffix="" id="949">
                                                     <real key="multiplier" value="1"/>
                                                     <real key="roundingIncrement" value="1"/>
@@ -176,8 +176,39 @@
                                                 <binding destination="494" name="value" keyPath="warningDays" id="965"/>
                                             </connections>
                                         </textField>
+                                        <textField verticalHuggingPriority="750" id="QZs-68-8lh">
+                                            <rect key="frame" x="256" y="157" width="50" height="22"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="hours" drawsBackground="YES" id="H0Z-4B-6om">
+                                                <numberFormatter key="formatter" formatterBehavior="custom10_4" positiveFormat="#,##1.###" negativeFormat="#,##1.###" numberStyle="decimal" allowsFloats="NO" paddingCharacter="*" roundingMode="halfUp" minimumIntegerDigits="1" maximumIntegerDigits="3" maximumFractionDigits="3" decimalSeparator="." groupingSeparator="," currencyDecimalSeparator="." plusSign="+" minusSign="-" notANumberSymbol="NaN" perMillSymbol="‰" percentSymbol="%" exponentSymbol="E" positivePrefix="" positiveSuffix="" negativePrefix="-" negativeSuffix="" id="81B-Ep-E3i">
+                                                    <real key="multiplier" value="1"/>
+                                                    <real key="roundingIncrement" value="1"/>
+                                                    <real key="minimum" value="1"/>
+                                                    <real key="maximum" value="999"/>
+                                                    <metadata>
+                                                        <real key="inspectorSampleValue" value="1111"/>
+                                                    </metadata>
+                                                </numberFormatter>
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                            <connections>
+                                                <action selector="setCheckInterval:" target="494" id="eKy-JJ-HmW"/>
+                                                <binding destination="494" name="value" keyPath="checkInterval" id="Vuz-bJ-x2t"/>
+                                            </connections>
+                                        </textField>
+                                        <textField verticalHuggingPriority="750" id="l68-JV-PGI">
+                                            <rect key="frame" x="14" y="38" width="294" height="14"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <textFieldCell key="cell" allowsUndo="NO" sendsActionOnEndEditing="YES" alignment="center" title="Note: Press Enter after modifying values to apply changes" id="Nbq-Rb-Asb">
+                                                <font key="font" metaFont="smallSystem"/>
+                                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
                                         <button verticalHuggingPriority="750" id="946">
-                                            <rect key="frame" x="200" y="4" width="112" height="32"/>
+                                            <rect key="frame" x="105" y="2" width="112" height="32"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="push" title="Test Settings" bezelStyle="rounded" alignment="center" state="on" borderStyle="border" inset="2" id="947">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -192,20 +223,20 @@
                             </tabViewItem>
                             <tabViewItem label="Reset" identifier="2" id="935">
                                 <view key="view" id="936">
-                                    <rect key="frame" x="10" y="33" width="323" height="210"/>
+                                    <rect key="frame" x="10" y="33" width="323" height="237"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <textField verticalHuggingPriority="750" id="977">
-                                            <rect key="frame" x="15" y="139" width="293" height="68"/>
+                                            <rect key="frame" x="15" y="125" width="293" height="51"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <textFieldCell key="cell" allowsUndo="NO" sendsActionOnEndEditing="YES" alignment="left" title="If you're having trouble with ADPassMon, you can remove your saved settings and revert to defaults by clicking this button." id="978">
+                                            <textFieldCell key="cell" allowsUndo="NO" sendsActionOnEndEditing="YES" alignment="left" title="If you're having trouble with ADPassMon, use this button to remove your saved settings and revert to defaults." id="978">
                                                 <font key="font" metaFont="system"/>
                                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
                                         <button verticalHuggingPriority="750" id="600">
-                                            <rect key="frame" x="88" y="103" width="146" height="32"/>
+                                            <rect key="frame" x="88" y="72" width="146" height="32"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="push" title="Revert to Defaults" bezelStyle="rounded" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="601">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -222,6 +253,7 @@
                     </tabView>
                 </subviews>
             </view>
+            <point key="canvasLocation" x="348.5" y="363"/>
         </window>
         <customObject id="494" customClass="ADPassMonAppDelegate">
             <connections>
