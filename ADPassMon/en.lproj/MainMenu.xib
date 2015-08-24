@@ -156,7 +156,7 @@
                                         <textField verticalHuggingPriority="750" id="QZs-68-8lh">
                                             <rect key="frame" x="256" y="157" width="50" height="22"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="hours" drawsBackground="YES" id="H0Z-4B-6om">
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" state="on" borderStyle="bezel" placeholderString="hours" drawsBackground="YES" id="H0Z-4B-6om">
                                                 <numberFormatter key="formatter" formatterBehavior="default10_4" numberStyle="decimal" minimumIntegerDigits="1" maximumIntegerDigits="2000000000" maximumFractionDigits="3" id="81B-Ep-E3i">
                                                     <real key="minimum" value="1"/>
                                                     <real key="maximum" value="24"/>
@@ -196,7 +196,7 @@
                                         <textField verticalHuggingPriority="750" id="945">
                                             <rect key="frame" x="256" y="97" width="50" height="22"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="days" drawsBackground="YES" id="948">
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" state="on" borderStyle="bezel" placeholderString="days" drawsBackground="YES" id="948">
                                                 <numberFormatter key="formatter" formatterBehavior="custom10_4" positiveFormat="#,##1.###" negativeFormat="#,##1.###" numberStyle="decimal" allowsFloats="NO" paddingCharacter="*" roundingMode="halfUp" minimumIntegerDigits="1" maximumIntegerDigits="3" maximumFractionDigits="3" decimalSeparator="." groupingSeparator="," currencyDecimalSeparator="." plusSign="+" minusSign="-" notANumberSymbol="NaN" perMillSymbol="‰" percentSymbol="%" exponentSymbol="E" positivePrefix="" positiveSuffix="" negativePrefix="-" negativeSuffix="" id="949">
                                                     <real key="multiplier" value="1"/>
                                                     <real key="roundingIncrement" value="1"/>

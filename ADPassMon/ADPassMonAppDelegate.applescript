@@ -38,7 +38,7 @@ script ADPassMonAppDelegate
     property NSMenu :                   class "NSMenu"
     property NSThread :                 class "NSThread" -- for 'sleep'-like feature
     property NSMenuItem :               class "NSMenuItem"
-    property NSTimer :                  class "NSTimer" of current application -- so we can do stuff at regular intervals
+    property NSTimer :                  class "NSTimer" -- so we can do stuff at regular intervals
     property NSUserNotificationCenter : class "NSUserNotificationCenter" -- for notification center
     property NSWorkspace :              class "NSWorkspace" -- for sleep notification
 
@@ -235,7 +235,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to set my selectedMethod to objectForKey_("selectedMethod") as integer
         tell defaults to set my isManualEnabled to objectForKey_("isManualEnabled") as integer
         tell defaults to set my enableNotifications to objectForKey_("enableNotifications") as integer
-        tell defaults to set my checkInterval to objectForKey_("checkInterval") as real
+        tell defaults to set my checkInterval to objectForKey_("checkInterval") as integer
         tell defaults to set my expireAge to objectForKey_("expireAge") as integer
         tell defaults to set my expireDateUnix to objectForKey_("expireDateUnix") as integer
         tell defaults to set my pwdSetDate to objectForKey_("pwdSetDate") as integer
@@ -751,15 +751,21 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
     on setWarningDays_(sender)
         set my warningDays to sender's intValue() as integer
         tell defaults to setObject_forKey_(warningDays, "warningDays")
+        log "Set warning days to " & warningDays
     end setWarningDays_
 
     -- Bound to checkInterval box in Prefs window
     on setCheckInterval_(sender)
         processTimer's invalidate() -- kills the existing timer
-        set my checkInterval to sender's intValue() as real
+        set my checkInterval to sender's intValue() as integer
         tell defaults to setObject_forKey_(checkInterval, "checkInterval")
         -- start a timer with the new interval
-        set my processTimer to current application's NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_((my checkInterval * 3600) as integer, me, "intervalDoProcess:", missing value, true)
+        set processTimer to current application's NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_((my checkInterval * 3600), me, "intervalDoProcess:", missing value, true)
+        set unit to " hours"
+        if checkInterval is equal to 1 then
+            set unit to " hour"
+        end if
+        log "Set check interval to " & checkInterval & unit
     end setCheckInterval_
 
     -- Bound to Notify items in menu and Prefs window
@@ -949,10 +955,10 @@ Please choose your configuration options."
             watchForWake_(me)
             
             -- Set a timer to check for domain connectivity every five minutes. (300)
-            set my domainTimer to current application's NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(300, me, "intervalDomainTest:", missing value, true)
+            set domainTimer to NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(300, me, "intervalDomainTest:", missing value, true)
         
             -- Set a timer to trigger doProcess handler on an interval and spawn notifications (if enabled).
-            set my processTimer to current application's NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_((my checkInterval * 3600), me, "intervalDoProcess:", missing value, true)
+            set processTimer to NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_((my checkInterval * 3600), me, "intervalDoProcess:", missing value, true)
         else
             log "Password does not exipire. Stopping."
             updateMenuTitle_("[--]", "Your password does not expire.")
