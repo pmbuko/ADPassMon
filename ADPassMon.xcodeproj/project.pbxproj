@@ -15,7 +15,7 @@
 		39094F381338DBE4007821C2 /* ADPassMonAppDelegate.applescript in Sources */ = {isa = PBXBuildFile; fileRef = 39094F371338DBE4007821C2 /* ADPassMonAppDelegate.applescript */; };
 		39094F3B1338DBE4007821C2 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39094F391338DBE4007821C2 /* MainMenu.xib */; };
 		3910E5881341116300E7EE50 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 3910E5871341116300E7EE50 /* icon.icns */; };
-		391FC4F21361276900D2E33C /* README in Resources */ = {isa = PBXBuildFile; fileRef = 391FC4F11361276900D2E33C /* README */; };
+		391FC4F21361276900D2E33C /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 391FC4F11361276900D2E33C /* README.md */; };
 		39925B9F133CE6E8001C9566 /* LaunchAtLoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = 39925B9E133CE6E8001C9566 /* LaunchAtLoginController.m */; };
 		39952F35133BAD5800A8DD42 /* StatusMenuController.m in Sources */ = {isa = PBXBuildFile; fileRef = 39952F34133BAD5800A8DD42 /* StatusMenuController.m */; };
 		39DC46FB1B6A6DF000AABB81 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 39DC46FA1B6A6DF000AABB81 /* Images.xcassets */; };
@@ -48,7 +48,7 @@
 		39094F371338DBE4007821C2 /* ADPassMonAppDelegate.applescript */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.applescript; name = ADPassMonAppDelegate.applescript; path = ADPassMon/ADPassMonAppDelegate.applescript; sourceTree = "<group>"; };
 		39094F3A1338DBE4007821C2 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		3910E5871341116300E7EE50 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = icon.icns; path = ../icon.icns; sourceTree = "<group>"; };
-		391FC4F11361276900D2E33C /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
+		391FC4F11361276900D2E33C /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		39925B9D133CE6E8001C9566 /* LaunchAtLoginController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LaunchAtLoginController.h; sourceTree = "<group>"; };
 		39925B9E133CE6E8001C9566 /* LaunchAtLoginController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LaunchAtLoginController.m; sourceTree = "<group>"; };
 		39952F33133BAD5800A8DD42 /* StatusMenuController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StatusMenuController.h; sourceTree = "<group>"; };
@@ -72,7 +72,7 @@
 		39094F141338DBE4007821C2 = {
 			isa = PBXGroup;
 			children = (
-				391FC4F11361276900D2E33C /* README */,
+				391FC4F11361276900D2E33C /* README.md */,
 				39F99903133A5F19002DAED5 /* Classes */,
 				39094F2B1338DBE4007821C2 /* ADPassMon */,
 				39094F221338DBE4007821C2 /* Frameworks */,
@@ -199,7 +199,7 @@
 				39094F3B1338DBE4007821C2 /* MainMenu.xib in Resources */,
 				39DC46FB1B6A6DF000AABB81 /* Images.xcassets in Resources */,
 				3910E5881341116300E7EE50 /* icon.icns in Resources */,
-				391FC4F21361276900D2E33C /* README in Resources */,
+				391FC4F21361276900D2E33C /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
