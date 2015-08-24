@@ -38,7 +38,7 @@ script ADPassMonAppDelegate
     property NSMenu :                   class "NSMenu"
     property NSThread :                 class "NSThread" -- for 'sleep'-like feature
     property NSMenuItem :               class "NSMenuItem"
-    property NSTimer :                  class "NSTimer" -- so we can do stuff at regular intervals
+    property NSTimer :                  class "NSTimer" of current application -- so we can do stuff at regular intervals
     property NSUserNotificationCenter : class "NSUserNotificationCenter" -- for notification center
     property NSWorkspace :              class "NSWorkspace" -- for sleep notification
 
@@ -53,6 +53,8 @@ script ADPassMonAppDelegate
     property selectedMethod :       missing value
     property thePassword :          missing value
     property toggleNotifyButton :   missing value
+    property processTimer :         missing value
+    property domainTimer :          missing value
 
 --- Booleans
     property first_run :            true
@@ -95,6 +97,7 @@ script ADPassMonAppDelegate
     property daysUntilExpNice : ""
     property expirationDate :   ""
     property mavAccStatus :     ""
+    property checkInterval :    4  -- hours
 
 --- HANDLERS ---
 
@@ -211,6 +214,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
                                             selectedMethod:0, ¬
                                             isManualEnabled:isManualEnabled, ¬
                                             enableNotifications:enableNotifications, ¬
+                                            checkInterval:checkInterval, ¬
                                             expireAge:expireAge, ¬
                                             expireDateUnix:expireDateUnix, ¬
                                             pwdSetDate:pwdSetDate, ¬
@@ -231,6 +235,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to set my selectedMethod to objectForKey_("selectedMethod") as integer
         tell defaults to set my isManualEnabled to objectForKey_("isManualEnabled") as integer
         tell defaults to set my enableNotifications to objectForKey_("enableNotifications") as integer
+        tell defaults to set my checkInterval to objectForKey_("checkInterval") as real
         tell defaults to set my expireAge to objectForKey_("expireAge") as integer
         tell defaults to set my expireDateUnix to objectForKey_("expireDateUnix") as integer
         tell defaults to set my pwdSetDate to objectForKey_("pwdSetDate") as integer
@@ -305,6 +310,10 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
             my statusMenu's itemWithTitle_("Change Password…")'s setEnabled_(0)
         end if
     end domainTest_
+    
+    on intervalDomainTest_(sender)
+        domainTest_(me)
+    end intervalDomainTest_
 
     -- Check if password is set to never expire
     on canPassExpire_(sender)
@@ -655,6 +664,10 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         doProcess_(me)
     end doProcessWithWait_
 
+    on intervalDoProcess_(sender)
+        doProcess_(me)
+    end intervalDoProcess_
+
 --- INTERFACE BINDING HANDLERS ---
 
     -- Bound to About item
@@ -740,6 +753,15 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to setObject_forKey_(warningDays, "warningDays")
     end setWarningDays_
 
+    -- Bound to checkInterval box in Prefs window
+    on setCheckInterval_(sender)
+        processTimer's invalidate() -- kills the existing timer
+        set my checkInterval to sender's intValue() as real
+        tell defaults to setObject_forKey_(checkInterval, "checkInterval")
+        -- start a timer with the new interval
+        set my processTimer to current application's NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_((my checkInterval * 3600) as integer, me, "intervalDoProcess:", missing value, true)
+    end setCheckInterval_
+
     -- Bound to Notify items in menu and Prefs window
     on toggleNotify_(sender)
         if my enableNotifications as boolean is true then
@@ -776,6 +798,7 @@ Enable it now?" with icon 2 buttons {"No", "Yes"} default button 2)
         tell defaults to removeObjectForKey_("tooltip")
         tell defaults to removeObjectForKey_("selectedMethod")
         tell defaults to removeObjectForKey_("enableNotifications")
+        tell defaults to removeObjectForKey_("checkInterval")
         tell defaults to removeObjectForKey_("expireAge")
         tell defaults to removeObjectForKey_("expireDateUnix")
         tell defaults to removeObjectForKey_("pwdSetDate")
@@ -924,12 +947,12 @@ Please choose your configuration options."
             end if
         
             watchForWake_(me)
-        
-            -- Set a timer to trigger doProcess handler every 6 hrs and spawn notifications (if enabled).
-            NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(21600, me, "doProcess:", missing value, true)
             
-            -- Set a timer to check for domain connectivity every two minutes.
-            NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(120, me, "domainTest:", missing value, true)
+            -- Set a timer to check for domain connectivity every five minutes. (300)
+            set my domainTimer to current application's NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(300, me, "intervalDomainTest:", missing value, true)
+        
+            -- Set a timer to trigger doProcess handler on an interval and spawn notifications (if enabled).
+            set my processTimer to current application's NSTimer's scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_((my checkInterval * 3600), me, "intervalDoProcess:", missing value, true)
         else
             log "Password does not exipire. Stopping."
             updateMenuTitle_("[--]", "Your password does not expire.")
